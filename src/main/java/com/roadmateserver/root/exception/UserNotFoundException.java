@@ -1,0 +1,7 @@
+package com.roadmateserver.root.exception;
+
+public class UserNotFoundException extends RuntimeException {
+    public UserNotFoundException(String message) {
+        super(message);
+    }
+}
