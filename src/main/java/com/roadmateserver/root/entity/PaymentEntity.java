@@ -25,6 +25,11 @@ public class PaymentEntity {
     @NotNull(message = "Booking must not be null")
     private BookingEntity booking;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
+    @NotNull(message = "User must not be null")
+    private UserEntity user;
+
     @Column(name = "amount", nullable = false)
     @NotNull(message = "Amount must not be null")
     private Double amount;

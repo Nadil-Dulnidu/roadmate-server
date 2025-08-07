@@ -59,4 +59,10 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "user")
     private List<BookingEntity> bookings;
+
+    @OneToMany(mappedBy = "user")
+    private List<ReviewEntity> reviews;
+
+    @OneToMany(mappedBy = "user")
+    private List<PaymentEntity> payments;
 }
