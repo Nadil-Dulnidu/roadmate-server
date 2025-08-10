@@ -25,7 +25,7 @@ public class VehicleDTOEntityMapper {
         dto.setVehicleStatus(vehicleEntity.getIsAvailable());
         if(Objects.isNull(vehicleEntity.getOwner()))
             throw new IllegalArgumentException("Owner must not be null in VehicleEntity");
-        dto.setOwnerId(vehicleEntity.getOwner().getUserId());
+        dto.setOwnerId(vehicleEntity.getOwner().getClerkId());
         return dto;
     }
 

@@ -56,7 +56,7 @@ public class VehicleServiceImpl implements VehicleService {
             throw new VehicleException("Vehicle with license plate '" + vehicleDTO.getLicensePlate() + "' already exists.");
         }
         log.debug("UserEntity mapping from VehicleDTO owner for vehicle with ID: {}", vehicleDTO.getVehicleId());
-        final UserEntity userEntity = userRepository.findById(vehicleDTO.getOwnerId())
+        final UserEntity userEntity = userRepository.findByClerkId(vehicleDTO.getOwnerId())
                 .orElseThrow(() -> {
                     log.error("User with ID {} not found", vehicleDTO.getOwnerId());
                     return new IllegalArgumentException("User with ID " + vehicleDTO.getOwnerId() + " not found");
@@ -219,10 +219,16 @@ public class VehicleServiceImpl implements VehicleService {
                     return new IllegalArgumentException("Owner not found with ID: " + ownerId);
                 });
         final List<VehicleEntity> vehicleEntities = vehicleRepository.findByOwner(owner);
-        return vehicleEntities
-                .stream()
-                .map(VehicleDTOEntityMapper::map)
-                .toList();
-
+        final List<VehicleDTO> vehicleDTOs = vehicleEntities.stream()
+                .map(vehicleEntity -> {
+                    final VehicleDTO vehicleDTO = VehicleDTOEntityMapper.map(vehicleEntity);
+                    final List<ImageDTO> imageDTOs = vehicleEntity.getImages().stream()
+                            .map(ImageDTOEntityMapper::map)
+                            .toList();
+                    vehicleDTO.setImages(imageDTOs);
+                    return vehicleDTO;
+                }).toList();
+        log.info("Fetched {} vehicles successfully.", vehicleDTOs.size());
+        return vehicleDTOs;
     }
 }

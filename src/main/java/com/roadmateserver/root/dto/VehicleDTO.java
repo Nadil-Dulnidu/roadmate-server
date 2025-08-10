@@ -86,7 +86,7 @@ public class VehicleDTO {
     @JsonProperty("owner_id")
     @NotNull(message = "Owner must not be null")
     @Schema(description = "Unique identifier for the owner of the vehicle", example = "1")
-    private Integer ownerId;
+    private String ownerId;
 
     @JsonProperty("images")
     @NotNull(message = "Images must not be null")
