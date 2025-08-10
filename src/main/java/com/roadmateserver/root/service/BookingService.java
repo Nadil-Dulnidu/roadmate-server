@@ -19,15 +19,13 @@ public interface BookingService {
 
     /**
      * Retrieves all bookings in the system, optionally filtered by user ID and vehicle ID.
-     * @param userIdFilter list of user IDs to filter bookings by, can be empty or null for no filtering.
-     * @param vehicleIdFilter list of vehicle IDs to filter bookings by, can be empty or null for no filtering.
      * @return a list of all booking data transfer objects matching the filters. Never {@code null}, but may be empty.
      */
     List<BookingDTO> getAllBookings();
 
     /**
      * Deletes a booking by its unique identifier.
-     * @param bookingId the ID of the booking to delete; must not be {@code null}.
+     * @param bookingDTO the booking data transfer object containing the ID of the booking to delete. Must not be {@code null}.
      * @return the booking data transfer object that was deleted.
      * @throws IllegalArgumentException if the provided bookingId is {@code null} or invalid.
      */
@@ -44,7 +42,7 @@ public interface BookingService {
     /**
      * Updates the status of a booking.
      * @param bookingId the ID of the booking to update; must not be {@code null}.
-     * @param status the new status to set for the booking; must not be {@code null} or empty.
+     * @param bookingStatus the new status to set for the booking; must not be {@code null} or empty.
      * @return the updated booking data transfer object after the changes have been persisted.
      * @throws IllegalArgumentException if the provided bookingId is {@code null} or invalid, or if the status is {@code null} or empty.
      */

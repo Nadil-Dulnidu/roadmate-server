@@ -2,17 +2,14 @@ package com.roadmateserver.root.service.impl;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.BookingDTO;
-import com.roadmateserver.root.dto.UserDTO;
 import com.roadmateserver.root.dto.VehicleDTO;
 import com.roadmateserver.root.entity.BookingEntity;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.entity.VehicleEntity;
 import com.roadmateserver.root.mapper.BookingDTOEntityMapper;
-import com.roadmateserver.root.mapper.UserDTOEntityMapper;
 import com.roadmateserver.root.mapper.VehicleDTOEntityMapper;
 import com.roadmateserver.root.repository.BookingRepository;
 import com.roadmateserver.root.repository.UserRepository;
-import com.roadmateserver.root.repository.VehicleRepository;
 import com.roadmateserver.root.service.BookingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
