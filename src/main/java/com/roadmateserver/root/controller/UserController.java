@@ -32,6 +32,12 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostMapping(produces = Constants.APPLICATION_JSON, consumes = Constants.APPLICATION_JSON)
+    public ResponseEntity<?> createUser(@Valid @RequestBody final UserDTO userDTO) {
+        final UserDTO savedUserDTO = userService.createUser(userDTO);
+        return ResponseEntity.ok(savedUserDTO);
+    }
+
     @Operation(summary = "Get user by ID", description = "Retrieve a user using their numeric ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User found",

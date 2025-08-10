@@ -1,6 +1,5 @@
 package com.roadmateserver.root.service.impl;
 
-
 import com.roadmateserver.root.dto.UserDTO;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.exception.UserException;

@@ -1,7 +1,5 @@
 package com.roadmateserver.root.mapper;
 
-
-
 import com.roadmateserver.root.dto.UserDTO;
 import com.roadmateserver.root.entity.UserEntity;
 
