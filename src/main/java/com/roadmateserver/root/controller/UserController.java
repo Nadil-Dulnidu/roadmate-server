@@ -32,8 +32,19 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Create a new user", description = "Register a new user with the provided details.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User created successfully",
+                    content = @Content(schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping(produces = Constants.APPLICATION_JSON, consumes = Constants.APPLICATION_JSON)
-    public ResponseEntity<?> createUser(@Valid @RequestBody final UserDTO userDTO) {
+    public ResponseEntity<?> createUser(
+            @Parameter(description = "User details to be created", required = true)
+            @Valid @RequestBody final UserDTO userDTO) {
         final UserDTO savedUserDTO = userService.createUser(userDTO);
         return ResponseEntity.ok(savedUserDTO);
     }
@@ -90,5 +101,39 @@ public class UserController {
             @RequestParam(value = "role", required = false) String roleFilter) {
         final Iterable<UserDTO> users = userService.getAllUsers(firstNameFilter, emailFilter, roleFilter);
         return ResponseEntity.ok(users);
+    }
+
+    @Operation(summary = "Update user details", description = "Update the details of an existing user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully",
+                    content = @Content(schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user data"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping(produces = Constants.APPLICATION_JSON, consumes = Constants.APPLICATION_JSON)
+    public ResponseEntity<UserDTO> updateUser(
+            @Parameter(description = "User details to be updated", required = true)
+            @Valid @RequestBody final UserDTO userDTO) {
+        final UserDTO updatedUserDTO = userService.updateUser(userDTO);
+        return ResponseEntity.ok(updatedUserDTO);
+    }
+
+    @Operation(summary = "Delete a user", description = "Delete a user by their unique Clerk ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User deleted successfully",
+                    content = @Content(schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid user ID"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @DeleteMapping(value = "/{clerkId}", produces = Constants.APPLICATION_JSON)
+    public ResponseEntity<UserDTO> deleteUser(
+            @Parameter(description = "Clerk ID of the user to be deleted", required = true)
+            @PathVariable final String clerkId) {
+        final UserDTO deletedUserDTO = userService.deleteUserByClerkId(clerkId);
+        return ResponseEntity.ok(deletedUserDTO);
     }
 }
