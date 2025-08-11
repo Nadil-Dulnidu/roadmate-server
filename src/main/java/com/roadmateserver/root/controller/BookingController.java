@@ -116,9 +116,9 @@ public class BookingController {
     public ResponseEntity<BookingDTO> updateBookingStatus(
             @Parameter(description = "Booking ID to update", required = true)
             @Valid @Min(value = 1, message = "booking id must be a positive integer")
-            @PathVariable("id")  final Integer bookingId,
+            @PathVariable("id") final Integer bookingId,
             @Parameter(description = "New status for the booking", required = true)
-            @Valid @RequestParam("status") final Constants.BookingStatus bookingStatus) {
+            @Valid @RequestParam final Constants.BookingStatus bookingStatus) {
         final BookingDTO updatedBookingDTO = bookingService.updateBookingStatus(bookingId, bookingStatus);
         return ResponseEntity.ok(updatedBookingDTO);
     }

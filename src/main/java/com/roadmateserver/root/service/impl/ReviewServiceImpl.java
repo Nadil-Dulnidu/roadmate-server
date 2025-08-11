@@ -4,6 +4,9 @@ import com.roadmateserver.root.dto.ReviewDTO;
 import com.roadmateserver.root.entity.ReviewEntity;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.entity.VehicleEntity;
+import com.roadmateserver.root.exception.ReviewNotFoundException;
+import com.roadmateserver.root.exception.UserNotFoundException;
+import com.roadmateserver.root.exception.VehicleNotFoundException;
 import com.roadmateserver.root.mapper.ReviewDTOEntityMapper;
 import com.roadmateserver.root.repository.ReviewRepository;
 import com.roadmateserver.root.repository.UserRepository;
@@ -43,13 +46,13 @@ public class ReviewServiceImpl implements ReviewService {
         final VehicleEntity vehicleEntity = vehicleRepository.findById(reviewDTO.getVehicleId())
                 .orElseThrow(() -> {
                     log.error("Vehicle with ID {} not found", reviewDTO.getVehicleId());
-                    return new IllegalArgumentException("Vehicle not found");
+                    return new VehicleNotFoundException("Vehicle not found");
                 });
         log.debug("Vehicle found: {}", vehicleEntity);
         final UserEntity userEntity = userRepository.findByClerkId(reviewDTO.getRenterId())
                 .orElseThrow(() -> {
                     log.error("User with ID {} not found", reviewDTO.getRenterId());
-                    return new IllegalArgumentException("User not found");
+                    return new UserNotFoundException("User not found");
                 });
         log.debug("User found: {}", userEntity);
         final ReviewEntity reviewEntity = ReviewDTOEntityMapper.map(reviewDTO);
@@ -72,7 +75,7 @@ public class ReviewServiceImpl implements ReviewService {
         final ReviewEntity existingReview = reviewRepository.findById(reviewDTO.getReviewId())
                 .orElseThrow(() -> {
                     log.error("Review with ID {} not found", reviewDTO.getReviewId());
-                    return new IllegalArgumentException("Review not found");
+                    return new ReviewNotFoundException("Review not found");
                 });
         log.debug("Existing review found: {}", existingReview);
         existingReview.setReviewerName(reviewDTO.getReviewerName());

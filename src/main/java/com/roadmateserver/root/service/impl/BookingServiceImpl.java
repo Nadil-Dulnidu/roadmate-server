@@ -6,6 +6,9 @@ import com.roadmateserver.root.dto.VehicleDTO;
 import com.roadmateserver.root.entity.BookingEntity;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.entity.VehicleEntity;
+import com.roadmateserver.root.exception.BookingException;
+import com.roadmateserver.root.exception.BookingNotFoundException;
+import com.roadmateserver.root.exception.UserNotFoundException;
 import com.roadmateserver.root.mapper.BookingDTOEntityMapper;
 import com.roadmateserver.root.mapper.VehicleDTOEntityMapper;
 import com.roadmateserver.root.repository.BookingRepository;
@@ -42,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
         final UserEntity userEntity = userRepository.findByClerkId(bookingDTO.getRenterId())
                 .orElseThrow(() -> {
             log.error("User with ID {} not found", bookingDTO.getRenterId());
-            return new IllegalArgumentException("User not found");
+            return new UserNotFoundException("User not found");
         });
         log.debug("User found: {}", userEntity);
         final VehicleEntity vehicleEntity = VehicleDTOEntityMapper.map(bookingDTO.getVehicle());
@@ -84,13 +87,13 @@ public class BookingServiceImpl implements BookingService {
         }
         if(!bookingDTO.getStatus().equals(Constants.BookingStatus.PENDING)){
             log.error("Booking with ID {} cannot be deleted as it is not in PENDING status", bookingDTO.getId());
-            throw new IllegalArgumentException("Booking can only be deleted if it is in PENDING status");
+            throw new BookingException("Booking can only be deleted if it is in PENDING status");
         }
         log.info("Deleting booking with ID: {}", bookingDTO.getId());
         final BookingEntity bookingEntity = bookingRepository.findById(bookingDTO.getId())
                 .orElseThrow(() -> {
                     log.error("Booking with ID {} not found", bookingDTO.getId());
-                    return new IllegalArgumentException("Booking not found");
+                    return new BookingNotFoundException("Booking not found");
                 });
         log.debug("Booking found: {}", bookingEntity);
         bookingRepository.delete(bookingEntity);
@@ -110,7 +113,7 @@ public class BookingServiceImpl implements BookingService {
         final BookingEntity bookingEntity = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> {
                     log.error("Booking with ID {} not found", bookingId);
-                    return new IllegalArgumentException("Booking not found");
+                    return new BookingNotFoundException("Booking not found");
                 });
         final VehicleDTO vehicleDTO = VehicleDTOEntityMapper.map(bookingEntity.getVehicle());
         log.debug("Vehicle mapped: {}", vehicleDTO);
@@ -126,13 +129,13 @@ public class BookingServiceImpl implements BookingService {
     public BookingDTO updateBookingStatus(final Integer bookingId, final Constants.BookingStatus bookingStatus) {
         if(Objects.isNull(bookingId) || Objects.isNull(bookingStatus)){
             log.error("Booking ID or status is null");
-            throw new IllegalArgumentException("Booking ID and status must not be null");
+            throw new BookingException("Booking ID and status must not be null");
         }
         log.info("Updating booking status for booking ID: {}", bookingId);
         final BookingEntity bookingEntity = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> {
                     log.error("Booking with ID {} not found", bookingId);
-                    return new IllegalArgumentException("Booking not found");
+                    return new BookingNotFoundException("Booking not found");
                 });
         log.debug("Booking found: {}", bookingEntity);
         bookingEntity.setStatus(bookingStatus);

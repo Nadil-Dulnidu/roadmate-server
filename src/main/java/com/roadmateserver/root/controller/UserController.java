@@ -1,6 +1,5 @@
 package com.roadmateserver.root.controller;
 
-
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.UserDTO;
 import com.roadmateserver.root.service.UserService;

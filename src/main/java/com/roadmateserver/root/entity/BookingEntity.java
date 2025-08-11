@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"renter", "vehicle"})
 public class BookingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +40,7 @@ public class BookingEntity {
     private String endDate;
 
     @Column(name = "total_price", nullable = false)
-    @NotBlank(message = "Total price must not be blank")
+    @NotNull(message = "Total price must not be blank")
     private Double totalPrice;
 
     @Column(name = "created_at", nullable = false)

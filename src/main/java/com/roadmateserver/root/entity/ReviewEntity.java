@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@ToString(exclude = {"user", "vehicle"})
 @Table(name = "review")
 public class ReviewEntity {
 
@@ -21,11 +23,11 @@ public class ReviewEntity {
     @Column(name = "review_id", unique = true)
     private Integer reviewId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "vehicle_id", nullable = false)
     private VehicleEntity vehicle;
 
@@ -33,9 +35,13 @@ public class ReviewEntity {
     @NotBlank(message = "Review text must not be null")
     private String reviewText;
 
+    @Column(name = "reviewer_name", nullable = false)
+    @NotBlank(message = "Reviewer name must not be null")
+    private String reviewerName;
+
     @Column(name = "rating", nullable = false)
     @NotNull(message = "Rating must not be null")
-    private Integer rating;
+    private Double rating;
 
     @Column(name = "created_at", nullable = false)
     @NotNull(message = "Created at must not be null")

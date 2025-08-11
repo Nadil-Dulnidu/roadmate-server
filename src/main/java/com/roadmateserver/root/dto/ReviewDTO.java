@@ -47,7 +47,7 @@ public class ReviewDTO {
     private Integer vehicleId;
 
     @JsonProperty("renter_id")
-    @NotNull(message = "Renter ID must not be null")
+    @NotBlank(message = "Renter ID must not be null")
     @Schema(description = "Unique identifier for the renter who made the review", example = "Renter123")
     private String renterId;
 

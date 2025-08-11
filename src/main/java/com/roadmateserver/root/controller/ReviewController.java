@@ -25,6 +25,7 @@ import java.util.List;
 @Validated
 @Tag(name = "Review Management", description = "Endpoints for managing reviews")
 public class ReviewController {
+
     private final ReviewService reviewService;
 
     @Autowired
@@ -44,7 +45,9 @@ public class ReviewController {
     })
     @PostMapping(consumes = Constants.APPLICATION_JSON, produces = Constants.APPLICATION_JSON)
     public ResponseEntity<ReviewDTO> createReview(
-            @Valid final ReviewDTO reviewDTO) {
+            @Parameter(description = "Review details to be created", required = true)
+            @Valid
+            @RequestBody final ReviewDTO reviewDTO) {
         final ReviewDTO createdReview = reviewService.createNewReview(reviewDTO);
         return ResponseEntity.ok(createdReview);
     }
@@ -61,7 +64,10 @@ public class ReviewController {
     })
     @GetMapping(value = "/vehicle/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<ReviewDTO>> getReviewsForVehicle(
-            @Valid @PathVariable("id") final Integer vehicleId) {
+            @Parameter(description = "Vehicle ID (positive integer)", required = true)
+            @Valid
+            @Min(value = 1, message = "id must be a positive integer")
+            @PathVariable("id") final Integer vehicleId) {
         final List<ReviewDTO> reviews = reviewService.getReviewsByVehicleId(vehicleId);
         return ResponseEntity.ok(reviews);
     }
@@ -78,7 +84,9 @@ public class ReviewController {
     })
     @GetMapping(value = "/user/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<ReviewDTO>> getReviewsByUserId(
-            @Valid @PathVariable("id") final String userId) {
+            @Parameter(description = "User ID (Clerk ID)", required = true)
+            @Valid
+            @PathVariable("id") final String userId) {
         final List<ReviewDTO> reviews = reviewService.getReviewsByUserId(userId);
         return ResponseEntity.ok(reviews);
     }
@@ -111,7 +119,9 @@ public class ReviewController {
     @DeleteMapping(value = "/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<ReviewDTO> deleteReview(
             @Parameter(description = "Review ID (positive integer)", required = true)
-            @Valid @Min(value = 1 , message = "id must be positive integer") @PathVariable("id") final Integer reviewId) {
+            @Valid
+            @Min(value = 1 , message = "id must be positive integer")
+            @PathVariable("id") final Integer reviewId) {
         ReviewDTO deletedReview = reviewService.deleteReview(reviewId);
         return ResponseEntity.ok(deletedReview);
     }
@@ -129,7 +139,8 @@ public class ReviewController {
     @PutMapping(consumes = Constants.APPLICATION_JSON, produces = Constants.APPLICATION_JSON)
     public ResponseEntity<ReviewDTO> updateReview(
             @Parameter(description = "Review details to be updated", required = true)
-            @Valid @RequestBody final ReviewDTO reviewDTO) {
+            @Valid
+            @RequestBody final ReviewDTO reviewDTO) {
         final ReviewDTO updatedReview = reviewService.updateReview(reviewDTO);
         return ResponseEntity.ok(updatedReview);
     }
@@ -147,7 +158,8 @@ public class ReviewController {
     @GetMapping(value = "/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<ReviewDTO> getReviewById(
             @Parameter(description = "Review ID (positive integer)", required = true)
-            @Valid @Min(value = 1, message = "id must be a positive integer")
+            @Valid
+            @Min(value = 1, message = "id must be a positive integer")
             @PathVariable("id") final Integer id) {
         final ReviewDTO review = reviewService.getReviewById(id);
         return ResponseEntity.ok(review);
