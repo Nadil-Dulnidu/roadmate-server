@@ -11,10 +11,9 @@ public interface NotificationService {
     /**
      * Sends a notification to the user.
      *
-     * @param userId the ID of the user to whom the notification will be sent
-     * @param message the message to be sent in the notification
+     * @param notificationDTO the details of the notification to be sent
      *
-     * @return a NotificationDTO containing the details of the sent notification
+     * @return a NotificationDTO containing the details of the send notification
      */
     NotificationDTO sendNotification(NotificationDTO notificationDTO);
 
