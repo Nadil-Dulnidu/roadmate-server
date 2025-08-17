@@ -1,5 +1,6 @@
 package com.roadmateserver.root.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roadmateserver.root.dto.UserDTO;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.exception.UserException;
@@ -7,23 +8,26 @@ import com.roadmateserver.root.exception.UserNotFoundException;
 import com.roadmateserver.root.mapper.UserDTOEntityMapper;
 import com.roadmateserver.root.repository.UserRepository;
 import com.roadmateserver.root.service.UserService;
+import com.roadmateserver.root.utils.InterServiceCommunicationHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final InterServiceCommunicationHandler interServiceCommunicationHandler;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,
+                           InterServiceCommunicationHandler interServiceCommunicationHandler) {
+        this.interServiceCommunicationHandler = interServiceCommunicationHandler;
         this.userRepository = userRepository;
     }
 
@@ -157,4 +161,24 @@ public class UserServiceImpl implements UserService {
         log.info("User with clerkId '{}' successfully deleted.", clerkId);
         return UserDTOEntityMapper.map(userEntity);
     }
+
+    @Override
+    public void assignStudentRole(String userId) throws Exception {
+        log.info("Assigning student role to user with ID: {}", userId);
+        final String userResponse = interServiceCommunicationHandler.getUserId(userId);
+        log.debug("Fetched user info from clerk");
+        final Map<String, Object> userMap = objectMapper.readValue(userResponse, Map.class);
+        Map<String, Object> publicMetadata = (Map<String, Object>) userMap.get("public_metadata");
+        if (publicMetadata == null) {
+            publicMetadata = new HashMap<>();
+        }
+        publicMetadata.put("role", "STUDENT");
+        final Map<String, Object> updatePayload = new HashMap<>();
+        updatePayload.put("public_metadata", publicMetadata);
+        log.debug("Updating student role");
+        final String patchResponse = interServiceCommunicationHandler.updateUserMetaData(updatePayload,userId);
+        log.info("Student role assigned successfully for user with ID: {}", userId);
+    }
+
+
 }

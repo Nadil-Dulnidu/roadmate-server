@@ -69,4 +69,11 @@ public interface UserService {
      * @throws UserNotFoundException if the user with the specified clerk ID does not exist or cannot be deleted.
      */
     UserDTO deleteUserByClerkId(String clerkId);
+
+    /**
+     * Add "student" user role to the clerk public metadata
+     * @param userId Unique clerk userId
+     * @throws Exception Checked exceptions
+     */
+    void assignStudentRole(String userId) throws Exception;
 }
