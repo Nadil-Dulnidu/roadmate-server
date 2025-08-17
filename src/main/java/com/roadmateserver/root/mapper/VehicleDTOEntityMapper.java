@@ -15,6 +15,9 @@ public class VehicleDTOEntityMapper {
         dto.setModel(vehicleEntity.getModel());
         dto.setYear(vehicleEntity.getYear());
         dto.setColor(vehicleEntity.getColor());
+        dto.setNumberOfSeats(vehicleEntity.getNumberOfSeats());
+        dto.setEngine(vehicleEntity.getEngine());
+        dto.setTransmission(vehicleEntity.getTransmission());
         dto.setLicensePlate(vehicleEntity.getLicensePlate());
         dto.setLocation(vehicleEntity.getLocation());
         dto.setCity(vehicleEntity.getCity());
@@ -38,6 +41,9 @@ public class VehicleDTOEntityMapper {
         entity.setModel(vehicleDTO.getModel());
         entity.setYear(vehicleDTO.getYear());
         entity.setColor(vehicleDTO.getColor());
+        entity.setNumberOfSeats(vehicleDTO.getNumberOfSeats());
+        entity.setEngine(vehicleDTO.getEngine());
+        entity.setTransmission(vehicleDTO.getTransmission());
         entity.setLicensePlate(vehicleDTO.getLicensePlate());
         entity.setLocation(vehicleDTO.getLocation());
         entity.setCity(vehicleDTO.getCity());

@@ -43,6 +43,20 @@ public class VehicleEntity {
     @NotBlank(message = "Color must not be null")
     private String color;
 
+    @Column(name = "engine", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Engine type must not be null")
+    private Constants.EngineType engine;
+
+    @Column(name = "transmission", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Transmission type must not be null")
+    private Constants.TransmissionType transmission;
+
+    @Column(name = "number_of_seats", nullable = false)
+    @NotNull(message = "Number of seats must not be null")
+    private Integer numberOfSeats;
+
     @Column(name = "license_plate", nullable = false, unique = true)
     @NotBlank(message = "License plate must not be null")
     private String licensePlate;

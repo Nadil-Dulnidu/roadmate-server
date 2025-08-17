@@ -48,6 +48,21 @@ public class VehicleDTO {
     @Schema(description = "Color of the vehicle", example = "Red")
     private String color;
 
+    @JsonProperty("engine")
+    @NotNull(message = "Engine type must not be null")
+    @Schema(description = "Engine type of the vehicle", example = "PETROL")
+    private Constants.EngineType engine;
+
+    @JsonProperty("transmission")
+    @NotNull(message = "Transmission type must not be null")
+    @Schema(description = "Transmission type of the vehicle", example = "AUTOMATIC")
+    private Constants.TransmissionType transmission;
+
+    @JsonProperty("number_of_seats")
+    @NotNull(message = "Number of seats must not be null")
+    @Schema(description = "Number of seats in the vehicle", example = "5")
+    private Integer numberOfSeats;
+
     @JsonProperty("license_plate")
     @NotBlank(message = "License plate must not be null")
     @Schema(description = "License plate number of the vehicle", example = "XYZ-1234")
