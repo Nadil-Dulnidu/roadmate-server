@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @AllArgsConstructor
@@ -57,6 +57,6 @@ public class UserDTO {
     @NonNull
     @Schema(description = "Timestamp when the user was created", example = "2023-10-01T12:00:00Z")
     @NotNull(message = "Created at date must not be null")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
 }

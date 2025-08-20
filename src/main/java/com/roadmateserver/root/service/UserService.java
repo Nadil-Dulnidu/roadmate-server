@@ -1,5 +1,6 @@
 package com.roadmateserver.root.service;
 
+import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.UserDTO;
 import org.springframework.stereotype.Service;
 import com.roadmateserver.root.exception.UserException;
@@ -75,5 +76,5 @@ public interface UserService {
      * @param userId Unique clerk userId
      * @throws Exception Checked exceptions
      */
-    void assignStudentRole(String userId) throws Exception;
+    void assignStudentRole(String userId, Constants.UserRole role) throws Exception;
 }

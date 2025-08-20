@@ -81,6 +81,12 @@ public class VehicleEntity {
     @NotBlank(message = "Contact number must not be blank")
     private String contactNumber;
 
+    @Column(name = "review_rating", columnDefinition = "double default 0.0")
+    private Double reviewRating;
+
+    @Column(name = "review_count", columnDefinition = "integer default 0")
+    private Integer reviewCount;
+
     @Column(name = "availability", nullable = false)
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Availability must not be null")
@@ -96,4 +102,17 @@ public class VehicleEntity {
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ReviewEntity> reviews;
+
+    @OneToMany(mappedBy = "vehicle")
+    private List<BookingEntity> bookings = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        if (reviewCount == null) {
+            reviewCount = 0;
+        }
+        if(reviewRating == null) {
+            reviewRating = 0.0;
+        }
+    }
 }

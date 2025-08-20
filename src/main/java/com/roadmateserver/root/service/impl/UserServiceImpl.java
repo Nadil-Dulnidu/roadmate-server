@@ -1,6 +1,7 @@
 package com.roadmateserver.root.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.UserDTO;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.exception.UserException;
@@ -163,7 +164,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void assignStudentRole(String userId) throws Exception {
+    public void assignStudentRole(final String userId, final Constants.UserRole role) throws Exception {
         log.info("Assigning student role to user with ID: {}", userId);
         final String userResponse = interServiceCommunicationHandler.getUserId(userId);
         log.debug("Fetched user info from clerk");
@@ -172,11 +173,11 @@ public class UserServiceImpl implements UserService {
         if (publicMetadata == null) {
             publicMetadata = new HashMap<>();
         }
-        publicMetadata.put("role", "STUDENT");
+        publicMetadata.put("role", role);
         final Map<String, Object> updatePayload = new HashMap<>();
         updatePayload.put("public_metadata", publicMetadata);
         log.debug("Updating student role");
-        final String patchResponse = interServiceCommunicationHandler.updateUserMetaData(updatePayload,userId);
+        interServiceCommunicationHandler.updateUserMetaData(updatePayload,userId);
         log.info("Student role assigned successfully for user with ID: {}", userId);
     }
 

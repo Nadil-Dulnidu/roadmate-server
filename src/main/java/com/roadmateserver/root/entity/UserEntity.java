@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -46,12 +47,12 @@ public class UserEntity {
 
     @Column(name = "created_at", nullable = false)
     @NotNull(message = "Created at must not be null")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Role must not be null")
-    private Constants.UserRole role = Constants.UserRole.RENTER;
+    private Constants.UserRole role;
 
     @OneToMany(mappedBy = "owner")
     private List<VehicleEntity> vehicles;

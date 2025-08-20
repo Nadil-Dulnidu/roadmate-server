@@ -64,7 +64,8 @@ public class VehicleServiceImpl implements VehicleService {
         log.debug("Mapping VehicleDTO to VehicleEntity for vehicle with ID: {}", vehicleDTO.getVehicleId());
         final VehicleEntity vehicleEntity = VehicleDTOEntityMapper.map(vehicleDTO);
         log.debug("Create ImageEntity list from VehicleDTO images for vehicle with ID: {}", vehicleDTO.getVehicleId());
-        final List<ImageEntity> imageEntities = vehicleDTO.getImages().stream()
+        final List<ImageEntity> imageEntities = vehicleDTO.getImages()
+                .stream()
                 .map(imageDTO -> {
                     final ImageEntity imageEntity = ImageDTOEntityMapper.map(imageDTO);
                     imageEntity.setVehicle(vehicleEntity);

@@ -142,7 +142,7 @@ public class VehicleController {
             @Valid
             @Min(value = 1, message = "vehicle id must be a positive number")
             @PathVariable final Integer vehicleId,
-            @RequestParam final Constants.VehicleStatus vehicleStatus) {
+            @RequestParam("status") final Constants.VehicleStatus vehicleStatus) {
         final VehicleDTO updatedVehicleDTO = vehicleService.updateVehicleStatus(vehicleId, vehicleStatus);
         return ResponseEntity.ok(updatedVehicleDTO);
     }

@@ -22,6 +22,7 @@ public class Constants {
 
     public enum VehicleType {
         CAR,
+        SUV,
         PICKUP_TRUCK,
         MOTORCYCLE,
         VAN,
@@ -42,7 +43,7 @@ public class Constants {
     }
 
     public enum EngineType {
-        PATROL,
+        PETROL,
         DIESEL,
         ELECTRIC,
         HYBRID

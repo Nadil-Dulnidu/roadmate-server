@@ -60,6 +60,9 @@ public class ReviewServiceImpl implements ReviewService {
         reviewEntity.setUser(userEntity);
         log.debug("Review entity created: {}", reviewEntity);
         final ReviewEntity savedReviewEntity = reviewRepository.save(reviewEntity);
+        final VehicleEntity updatedVehicle = setReviewCountAndRating(vehicleEntity);
+        vehicleRepository.save(updatedVehicle);
+        log.debug("Vehicle updated with new review count and rating: {}", updatedVehicle);
         log.info("Review created successfully with ID: {}", savedReviewEntity.getReviewId());
         return ReviewDTOEntityMapper.map(savedReviewEntity);
     }
@@ -161,5 +164,28 @@ public class ReviewServiceImpl implements ReviewService {
                 .toList();
         log.debug("Reviews for user ID {} retrieved: {}", userId, reviewDTOS);
         return reviewDTOS;
+    }
+
+    //helper method to set review count and rating
+    public VehicleEntity setReviewCountAndRating(VehicleEntity vehicleEntity) {
+        if (Objects.isNull(vehicleEntity)) {
+            log.error("Vehicle entity cannot be null");
+            throw new IllegalArgumentException("Vehicle entity cannot be null");
+        }
+        log.info("Setting review count and rating for vehicle ID: {}", vehicleEntity.getVehicleId());
+        List<ReviewEntity> reviews = reviewRepository.findAllByVehicle_VehicleId(vehicleEntity.getVehicleId());
+        if (reviews.isEmpty()) {
+            vehicleEntity.setReviewCount(0);
+            vehicleEntity.setReviewRating(0.0);
+        } else {
+            double totalRating = reviews.stream().mapToDouble(ReviewEntity::getRating).sum();
+            vehicleEntity.setReviewCount(reviews.size());
+            vehicleEntity.setReviewRating(totalRating / reviews.size());
+        }
+        log.debug("Review count and rating set for vehicle ID {}: Count = {}, Rating = {}",
+                  vehicleEntity.getVehicleId(),
+                  vehicleEntity.getReviewCount(),
+                  vehicleEntity.getReviewRating());
+        return vehicleEntity;
     }
 }

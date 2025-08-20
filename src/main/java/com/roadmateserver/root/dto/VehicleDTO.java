@@ -93,6 +93,14 @@ public class VehicleDTO {
     @Schema(description = "Contact number for the vehicle owner", example = "+1234567890")
     private String contactNumber;
 
+    @JsonProperty("rating")
+    @Schema(description = "Average rating of the vehicle based on reviews", example = "4.5")
+    private Double rating;
+
+    @JsonProperty("review_count")
+    @Schema(description = "Number of reviews for the vehicle", example = "10")
+    private Integer reviewCount;
+
     @JsonProperty("available")
     @NotNull(message = "Availability must not be null")
     @Schema(description = "Indicates if the vehicle is available for rent", example = "true")

@@ -25,6 +25,8 @@ public class VehicleDTOEntityMapper {
         dto.setPricePerDay(vehicleEntity.getPricePerDay());
         dto.setVehicleType(vehicleEntity.getVehicleType());
         dto.setContactNumber(vehicleEntity.getContactNumber());
+        dto.setReviewCount(vehicleEntity.getReviewCount());
+        dto.setRating(vehicleEntity.getReviewRating());
         dto.setVehicleStatus(vehicleEntity.getIsAvailable());
         if(Objects.isNull(vehicleEntity.getOwner()))
             throw new IllegalArgumentException("Owner must not be null in VehicleEntity");
@@ -52,6 +54,8 @@ public class VehicleDTOEntityMapper {
         entity.setVehicleType(vehicleDTO.getVehicleType());
         entity.setIsAvailable(vehicleDTO.getVehicleStatus());
         entity.setContactNumber(vehicleDTO.getContactNumber());
+        entity.setReviewCount(vehicleDTO.getReviewCount());
+        entity.setReviewRating(vehicleDTO.getRating());
         return entity;
 
     }
