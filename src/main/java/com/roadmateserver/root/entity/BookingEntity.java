@@ -27,8 +27,8 @@ public class BookingEntity {
     @JoinColumn(name = "renter_id", nullable = false)
     private UserEntity renter;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vehicle_id", referencedColumnName = "vehicle_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id", nullable = false)
     private VehicleEntity vehicle;
 
     @Column(name = "start_date", nullable = false)

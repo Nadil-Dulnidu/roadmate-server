@@ -112,13 +112,13 @@ public class BookingController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PatchMapping(value = "/{id}", produces = Constants.APPLICATION_JSON, consumes = Constants.APPLICATION_JSON)
+    @PatchMapping(value = "/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<BookingDTO> updateBookingStatus(
             @Parameter(description = "Booking ID to update", required = true)
             @Valid @Min(value = 1, message = "booking id must be a positive integer")
             @PathVariable("id") final Integer bookingId,
             @Parameter(description = "New status for the booking", required = true)
-            @Valid @RequestParam final Constants.BookingStatus bookingStatus) {
+            @Valid @RequestParam("status") final Constants.BookingStatus bookingStatus) {
         final BookingDTO updatedBookingDTO = bookingService.updateBookingStatus(bookingId, bookingStatus);
         return ResponseEntity.ok(updatedBookingDTO);
     }
