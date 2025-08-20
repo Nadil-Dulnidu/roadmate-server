@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Map;
 import java.util.Objects;
 
@@ -60,10 +58,7 @@ public class ClerkWebhookController {
                     .path("email_addresses")
                     .get(0).path("email_address");
             final Long createdAt = (Long) data.get("created_at");
-            final LocalDateTime createdAtDateTime = Instant.ofEpochSecond(createdAt)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime();
-
+            final Instant createdAtDateTime = Instant.ofEpochMilli(createdAt);
             if(body.get("type").equals("user.updated")){
                 final UserDTO user = new UserDTO(
                         userId,
@@ -84,8 +79,9 @@ public class ClerkWebhookController {
                     Constants.UserRole.RENTER,
                     createdAtDateTime
             );
+            System.out.println("UserDTO: " + userDTO);
             final UserDTO savedUser = userService.createUser(userDTO);
-            userService.assignStudentRole(userId);
+            userService.assignStudentRole(userId, Constants.UserRole.RENTER);
             return new ResponseEntity<>(savedUser, HttpStatus.OK);
         } catch (Exception e) {
             throw new ClerkException(e.getMessage());
