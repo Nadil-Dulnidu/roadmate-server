@@ -129,8 +129,8 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = Exception.class)
     public UserDTO updateUser(final UserDTO userDTO) {
         log.info("Updating user with clerkId: {}", userDTO.getClerkId());
-        if(Objects.isNull(userDTO.getClerkId()) || Objects.isNull(userDTO.getFirstName())
-                || Objects.isNull(userDTO.getLastName())){
+        if(Objects.isNull(userDTO.getClerkId()) || (Objects.isNull(userDTO.getFirstName())
+                && Objects.isNull(userDTO.getLastName()))){
             log.error("Failed to update user: userDTO is null");
             throw new IllegalArgumentException("userDTO is null");
         }
@@ -181,5 +181,22 @@ public class UserServiceImpl implements UserService {
         log.info("Student role assigned successfully for user with ID: {}", userId);
     }
 
-
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserDTO updateUserRole(String clerkId, Constants.UserRole newRole) {
+        log.info("Updating user with id: {}", clerkId);
+        if (Objects.isNull(clerkId) || Objects.isNull(newRole)) {
+            log.error("Failed to update user role: clerkId or newRole is null");
+            throw new IllegalArgumentException("clerkId and newRole must not be null");
+        }
+        final UserEntity userEntity = userRepository.findByClerkId(clerkId)
+                .orElseThrow(() -> {
+                    log.error("User not found with clerkId: {}", clerkId);
+                    return new UserNotFoundException("User not found with clerkId: " + clerkId);
+                });
+        userEntity.setRole(newRole);
+        final UserEntity updatedUserEntity = userRepository.save(userEntity);
+        log.info("User role updated successfully for clerkId: {}", clerkId);
+        return UserDTOEntityMapper.map(updatedUserEntity);
+    }
 }

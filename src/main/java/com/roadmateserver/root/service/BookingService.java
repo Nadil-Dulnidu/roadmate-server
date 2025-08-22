@@ -2,6 +2,7 @@ package com.roadmateserver.root.service;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.BookingDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -47,4 +48,15 @@ public interface BookingService {
      * @throws IllegalArgumentException if the provided bookingId is {@code null} or invalid, or if the status is {@code null} or empty.
      */
     BookingDTO updateBookingStatus(Integer bookingId, Constants.BookingStatus bookingStatus);
+
+    /**
+     * Retrieves bookings made by a specific renter, optionally filtered by booking status, with pagination support.
+     * @param renterId the ID of the renter whose bookings are to be retrieved; must not be {@code null}.
+     * @param status the status to filter bookings by; can be {@code null} to retrieve all statuses.
+     * @param page the page number to retrieve (0-based index); must be a non-negative integer.
+     * @param size the number of records per page; must be a positive integer.
+     * @return a paginated list of booking data transfer objects matching the criteria.
+     * @throws IllegalArgumentException if the provided renterId is {@code null} or if page/size parameters are invalid.
+     */
+    Page<BookingDTO> getBookingsByRenterId(String renterId, List<Constants.BookingStatus> status, Integer page, Integer size);
 }

@@ -12,12 +12,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/user")
@@ -41,7 +43,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping(produces = Constants.APPLICATION_JSON, consumes = Constants.APPLICATION_JSON)
-    public ResponseEntity<?> createUser(
+    public ResponseEntity<UserDTO> createUser(
             @Parameter(description = "User details to be created", required = true)
             @Valid @RequestBody final UserDTO userDTO) {
         final UserDTO savedUserDTO = userService.createUser(userDTO);
@@ -89,7 +91,6 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-
     @GetMapping(produces = Constants.APPLICATION_JSON)
     public ResponseEntity<Iterable<UserDTO>> getAllUsers(
             @Parameter(description = "Filter by first name")
@@ -134,5 +135,25 @@ public class UserController {
             @PathVariable final String clerkId) {
         final UserDTO deletedUserDTO = userService.deleteUserByClerkId(clerkId);
         return ResponseEntity.ok(deletedUserDTO);
+    }
+
+    @Operation(summary = "Update user role", description = "Assign a new role to a user by their Clerk ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User role updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid role or Clerk ID"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PatchMapping(value = "/role/{clerkId}", consumes = Constants.APPLICATION_JSON)
+    public ResponseEntity<UserDTO> UpdateUserRole
+            (@Parameter(description = "Clerk ID of the user whose role is to be updated", required = true)
+            @PathVariable final String clerkId,
+            @Parameter(description = "New role for the user", required = true)
+            @RequestParam("role") final Constants.UserRole newRole) throws Exception {
+        UserDTO updatedUserDTO = userService.updateUserRole(clerkId, newRole);
+        if (Objects.nonNull(updatedUserDTO))
+            userService.assignStudentRole(clerkId, newRole);
+        return ResponseEntity.ok(updatedUserDTO);
     }
 }

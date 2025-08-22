@@ -77,4 +77,14 @@ public interface UserService {
      * @throws Exception Checked exceptions
      */
     void assignStudentRole(String userId, Constants.UserRole role) throws Exception;
+
+    /**
+     * Update the role of a user identified by their clerk ID.
+     * @param clerkId the unique identifier for the user whose role is to be updated; must not be {@code null}.
+     * @param newRole the new role to assign to the user; must not be {@code null}.
+     * @return the updated {@link UserDTO} object with the new role.
+     * @throws IllegalArgumentException if either clerkId or newRole is {@code null}.
+     * @throws UserNotFoundException if no user with the specified clerk ID exists.
+     */
+    UserDTO updateUserRole(String clerkId, Constants.UserRole newRole);
 }

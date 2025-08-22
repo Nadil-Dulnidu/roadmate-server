@@ -38,6 +38,7 @@ public class Constants {
     public enum BookingStatus {
         PENDING,
         CONFIRMED,
+        ACTIVE,
         COMPLETED,
         CANCELLED
     }

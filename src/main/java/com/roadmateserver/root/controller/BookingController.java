@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +27,6 @@ public class BookingController {
 
     private final BookingService bookingService;
 
-    @Autowired
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
@@ -123,4 +122,29 @@ public class BookingController {
         return ResponseEntity.ok(updatedBookingDTO);
     }
 
+    @Operation(summary = "Get bookings by renter ID",
+            description = "Retrieve all bookings made by a specific renter using their unique identifier.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = BookingDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid renter ID"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping(value = "/renter/{renterId}", produces = Constants.APPLICATION_JSON )
+    public ResponseEntity<Page<BookingDTO>> getBookingsByRenterId(
+            @Parameter(description = "Renter ID to fetch bookings for", required = true)
+            @Valid
+            @PathVariable("renterId") final String renterId,
+            @Parameter(description = "Page number for pagination", required = true)
+            @RequestParam(defaultValue = "0",value = "page") int page,
+            @Parameter(description = "Page size for pagination", required = true)
+            @RequestParam(defaultValue = "3", value = "size") int size,
+            @Parameter(description = "Filter bookings by status")
+            @RequestParam(required = false, value = "status") List<Constants.BookingStatus> statuses
+    ) {
+        final Page<BookingDTO> bookings = bookingService.getBookingsByRenterId(renterId, statuses, page, size);
+        return ResponseEntity.ok(bookings);
+    }
 }
