@@ -133,18 +133,14 @@ public class BookingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping(value = "/renter/{renterId}", produces = Constants.APPLICATION_JSON )
-    public ResponseEntity<Page<BookingDTO>> getBookingsByRenterId(
+    public ResponseEntity<List<BookingDTO>> getBookingsByRenterId(
             @Parameter(description = "Renter ID to fetch bookings for", required = true)
             @Valid
             @PathVariable("renterId") final String renterId,
-            @Parameter(description = "Page number for pagination", required = true)
-            @RequestParam(defaultValue = "0",value = "page") int page,
-            @Parameter(description = "Page size for pagination", required = true)
-            @RequestParam(defaultValue = "3", value = "size") int size,
             @Parameter(description = "Filter bookings by status")
             @RequestParam(required = false, value = "status") List<Constants.BookingStatus> statuses
     ) {
-        final Page<BookingDTO> bookings = bookingService.getBookingsByRenterId(renterId, statuses, page, size);
+        final List<BookingDTO> bookings = bookingService.getBookingsByRenterId(renterId, statuses);
         return ResponseEntity.ok(bookings);
     }
 }

@@ -17,9 +17,6 @@ import com.roadmateserver.root.service.BookingService;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -152,49 +149,25 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Page<BookingDTO> getBookingsByRenterId(final String renterId, final List<Constants.BookingStatus> statuses, final Integer page, final Integer size) {
-        if (Objects.isNull(page) || page < 0 || Objects.isNull(size) || size <= 0) {
-            log.error("Invalid pagination parameters: page={}, size={}", page, size);
-            throw new IllegalArgumentException("Page and size must be valid integers");
-        }
+    public List<BookingDTO> getBookingsByRenterId(final String renterId, final List<Constants.BookingStatus> statuses) {
         if (Objects.isNull(renterId) || renterId.isBlank()) {
             log.error("Renter ID is null or blank");
             throw new IllegalArgumentException("Renter ID must not be null or blank");
         }
-        log.info("Fetching bookings for renter ID: {}", renterId);
-        final UserEntity userEntity = userRepository.findByClerkId(renterId)
-                .orElseThrow(() -> {
-                    log.error("User with ID {} not found", renterId);
-                    return new UserNotFoundException("User not found");
-                });
-        log.debug("User found: {}", userEntity);
-        final Pageable pageable = PageRequest.of(page, size);
-        final Page<BookingDTO> bookingPage;
-        if(statuses == null || statuses.isEmpty()) {
-            log.info("Fetching all bookings for renter ID: {} without status filter", renterId);
-            bookingPage = bookingRepository.findAllByRenter_ClerkId(renterId, pageable)
-                    .map(booking -> {
-                        final VehicleDTO vehicleDTO = vehicleService.getVehicleById(booking.getVehicle().getVehicleId());
-                        log.debug("Vehicle mapped: {}", vehicleDTO);
-                        final BookingDTO bookingDTO = BookingDTOEntityMapper.map(booking);
-                        bookingDTO.setVehicle(vehicleDTO);
-                        log.debug("Booking mapped: {}", bookingDTO);
-                        return bookingDTO;
-                    });
-        } else {
-            log.info("Fetching bookings for renter ID: {} with status filter: {}", renterId, statuses);
-            bookingPage = bookingRepository.findAllByRenter_ClerkIdAndStatusIn(renterId, statuses, pageable)
-                    .map(booking -> {
-                        final VehicleDTO vehicleDTO = vehicleService.getVehicleById(booking.getVehicle().getVehicleId());
-                        log.debug("Vehicle mapped: {}", vehicleDTO);
-                        final BookingDTO bookingDTO = BookingDTOEntityMapper.map(booking);
-                        bookingDTO.setVehicle(vehicleDTO);
-                        log.debug("Booking mapped: {}", bookingDTO);
-                        return bookingDTO;
-                    });
-        }
-        log.info("Fetched {} bookings for renter ID: {}", bookingPage.getTotalElements(), renterId);
-        return bookingPage;
+        log.info("Fetching bookings for renter ID: {} with statuses: {}", renterId, statuses);
+        final List<BookingDTO> bookingDTOS = bookingRepository.findAllByRenter_ClerkId(renterId)
+                .stream()
+                .map(booking -> {
+                    final VehicleDTO vehicleDTO = vehicleService.getVehicleById(booking.getVehicle().getVehicleId());
+                    log.debug("Vehicle mapped: {}", vehicleDTO);
+                    final BookingDTO bookingDTO = BookingDTOEntityMapper.map(booking);
+                    log.debug("Booking mapped: {}", bookingDTO);
+                    bookingDTO.setVehicle(vehicleDTO);
+                    return bookingDTO;
+                })
+                .filter(bookingDTO -> statuses == null || statuses.isEmpty() || statuses.contains(bookingDTO.getStatus()))
+                .toList();
+        log.info("Retrieved {} bookings", bookingDTOS.size());
+        return bookingDTOS;
     }
-
 }

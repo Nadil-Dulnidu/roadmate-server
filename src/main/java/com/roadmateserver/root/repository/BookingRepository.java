@@ -17,20 +17,8 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Integer>
      * Finds all bookings made by a specific renter.
      * This method retrieves bookings associated with a renter identified by their clerk ID.
      * @param renterId the ID of the renter whose bookings are to be retrieved; must not be {@code null}.
-     * @param pageable the pagination information, including page number and size; must not be {@code null}.
-     * @return a paginated list of booking entities associated with the specified renter.
+     * @return a list of {@link BookingEntity} objects associated with the specified renter. Never {@code null}, but may be empty if no bookings are found.
      * @throws IllegalArgumentException if the provided renterId or pageable is {@code null}.
      */
-    Page<BookingEntity> findAllByRenter_ClerkId(String renterId, Pageable pageable);
-
-    /**
-     * Finds all bookings made by a specific renter with a given status.
-     * This method retrieves bookings associated with a renter identified by their clerk ID and filters them by status.
-     * @param renterId the ID of the renter whose bookings are to be retrieved; must not be {@code null}.
-     * @param statuses the list of booking statuses to filter by; must not be {@code null} or empty.
-     * @param pageable the pagination information, including page number and size; must not be {@code null}.
-     * @return a paginated list of booking entities associated with the specified renter and matching the provided statuses.
-     * @throws IllegalArgumentException if the provided renterId, statuses, or pageable is {@code null}.
-     */
-    Page<BookingEntity> findAllByRenter_ClerkIdAndStatusIn(String renterId, List<Constants.BookingStatus> statuses, Pageable pageable);
+    List<BookingEntity> findAllByRenter_ClerkId(String renterId);
 }

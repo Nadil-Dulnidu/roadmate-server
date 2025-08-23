@@ -58,5 +58,5 @@ public interface BookingService {
      * @return a paginated list of booking data transfer objects matching the criteria.
      * @throws IllegalArgumentException if the provided renterId is {@code null} or if page/size parameters are invalid.
      */
-    Page<BookingDTO> getBookingsByRenterId(String renterId, List<Constants.BookingStatus> status, Integer page, Integer size);
+    List<BookingDTO> getBookingsByRenterId(String renterId, List<Constants.BookingStatus> statuses);
 }
