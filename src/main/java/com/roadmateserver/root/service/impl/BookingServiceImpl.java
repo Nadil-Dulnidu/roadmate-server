@@ -26,12 +26,13 @@ import java.util.Objects;
 @Service
 @Slf4j
 public class BookingServiceImpl implements BookingService {
+
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final VehicleService vehicleService;
 
-    @Autowired
-    public BookingServiceImpl(BookingRepository bookingRepository, UserRepository userRepository,
+    public BookingServiceImpl(BookingRepository bookingRepository,
+                              UserRepository userRepository,
                               VehicleService vehicleService) {
         this.vehicleService = vehicleService;
         this.bookingRepository = bookingRepository;

@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -121,8 +122,12 @@ public class VehicleController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/vehicle")
-    public ResponseEntity<List<VehicleDTO>> getVehicles() {
-        final List<VehicleDTO> vehicles = vehicleService.getVehicles();
+    public ResponseEntity<Page<VehicleDTO>> getVehicles(
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "4") Integer size,
+            @RequestParam(value = "vehicleName", required = false) String vehicleName
+    ) {
+        final Page<VehicleDTO> vehicles = vehicleService.getVehiclesByPage(page,size,vehicleName);
         return ResponseEntity.ok(vehicles);
     }
 

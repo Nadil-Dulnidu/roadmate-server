@@ -2,6 +2,7 @@ package com.roadmateserver.root.service;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.VehicleDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.roadmateserver.root.exception.VehicleException;
 
@@ -74,4 +75,15 @@ public interface VehicleService {
      * @throws VehicleException if the vehicle with the specified ID does not exist or cannot be updated.
      */
     VehicleDTO updateVehicleStatus(Integer vehicleId, Constants.VehicleStatus vehicleStatus);
+
+    /**
+     * Retrieves a paginated list of vehicles, optionally filtered by vehicle names.
+     *
+     * @param pageNumber the page number to retrieve (0-based index).
+     * @param pageSize the number of vehicles per page.
+     * @param VehicleNames an optional list of vehicle names to filter the results. If null or empty, no filtering is applied.
+     * @return a Page of VehicleDTOs representing the requested page of vehicles.
+     * @throws IllegalArgumentException if pageNumber or pageSize are null or invalid.
+     */
+    Page<VehicleDTO> getVehiclesByPage(Integer pageNumber, Integer pageSize, String VehicleNames);
 }

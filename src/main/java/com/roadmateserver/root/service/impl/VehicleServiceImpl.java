@@ -16,6 +16,9 @@ import com.roadmateserver.root.repository.VehicleRepository;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -209,6 +212,24 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<VehicleDTO> getVehiclesByPage(final Integer pageNumber, final Integer pageSize, final String VehicleName) {
+        log.info("Fetching all vehicles...");
+        final Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        final Page<VehicleDTO> vehicleDTOs = vehicleRepository.findAll(VehicleName, pageable)
+                .map(vehicleEntity -> {
+                    final VehicleDTO vehicleDTO = VehicleDTOEntityMapper.map(vehicleEntity);
+                    final List<ImageDTO> imageDTOs = vehicleEntity.getImages().stream()
+                            .map(ImageDTOEntityMapper::map)
+                            .toList();
+                    vehicleDTO.setImages(imageDTOs);
+                    return vehicleDTO;
+                });
+        log.info("Fetched vehicles successfully.");
+        return vehicleDTOs;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<VehicleDTO> getAllVehiclesByOwnerId(final String ownerId) {
         if(Objects.isNull(ownerId)) {
             log.error("Owner ID must not be null");
@@ -220,15 +241,18 @@ public class VehicleServiceImpl implements VehicleService {
                     return new IllegalArgumentException("Owner not found with ID: " + ownerId);
                 });
         final List<VehicleEntity> vehicleEntities = vehicleRepository.findByOwner(owner);
-        final List<VehicleDTO> vehicleDTOs = vehicleEntities.stream()
+        final List<VehicleDTO> vehicleDTOs = vehicleEntities
+                .stream()
                 .map(vehicleEntity -> {
                     final VehicleDTO vehicleDTO = VehicleDTOEntityMapper.map(vehicleEntity);
-                    final List<ImageDTO> imageDTOs = vehicleEntity.getImages().stream()
+                    final List<ImageDTO> imageDTOs = vehicleEntity.getImages()
+                            .stream()
                             .map(ImageDTOEntityMapper::map)
                             .toList();
                     vehicleDTO.setImages(imageDTOs);
                     return vehicleDTO;
-                }).toList();
+                })
+                .toList();
         log.info("Fetched {} vehicles successfully.", vehicleDTOs.size());
         return vehicleDTOs;
     }

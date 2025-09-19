@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @ToString(exclude = {"user", "vehicle"})
 @Table(name = "review")
-public class ReviewEntity {
+public class  ReviewEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
