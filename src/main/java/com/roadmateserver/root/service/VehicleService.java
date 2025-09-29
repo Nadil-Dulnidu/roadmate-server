@@ -5,6 +5,7 @@ import com.roadmateserver.root.dto.VehicleDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.roadmateserver.root.exception.VehicleException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -15,11 +16,12 @@ public interface VehicleService {
      * Creates a new vehicle.
      *
      * @param vehicleDTO the vehicle data transfer object containing the details of the vehicle to be created.
+     * @param files files data
      * @return the created vehicle as a VehicleDTO.
      * @throws IllegalArgumentException if the vehicleDTO is null or contains invalid data.
      * @throws VehicleException if a vehicle with the same license plate already exists.
      */
-    VehicleDTO createNewVehicle(VehicleDTO vehicleDTO);
+    VehicleDTO createNewVehicle(VehicleDTO vehicleDTO,List<MultipartFile> files);
 
     /**
      * Updates an existing vehicle.

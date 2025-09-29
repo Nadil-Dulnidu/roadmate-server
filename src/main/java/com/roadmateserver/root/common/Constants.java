@@ -54,4 +54,13 @@ public class Constants {
         MANUAL,
         AUTOMATIC
     }
+
+    public enum NotificationType {
+        BOOKING,
+        PAYMENT,
+        VEHICLE,
+        REMINDER,
+        ALERT,
+        REVIEW
+    }
 }

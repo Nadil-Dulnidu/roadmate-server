@@ -13,15 +13,17 @@ import com.roadmateserver.root.mapper.VehicleDTOEntityMapper;
 import com.roadmateserver.root.repository.ImageRepository;
 import com.roadmateserver.root.repository.UserRepository;
 import com.roadmateserver.root.repository.VehicleRepository;
+import com.roadmateserver.root.service.S3Service;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,32 +31,33 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class VehicleServiceImpl implements VehicleService {
-
     private final VehicleRepository vehicleRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
-    @Autowired
     public VehicleServiceImpl(
             VehicleRepository vehicleRepository,
             ImageRepository imageRepository,
-            UserRepository userRepository ) {
+            UserRepository userRepository,
+            S3Service S3Service) {
         this.vehicleRepository = vehicleRepository;
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
+        this.s3Service = S3Service;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public VehicleDTO createNewVehicle(final VehicleDTO vehicleDTO) {
+    public VehicleDTO createNewVehicle(final VehicleDTO vehicleDTO, final List<MultipartFile> files) {
         log.info("Creating new vehicle...");
-        if(Objects.isNull(vehicleDTO)){
+        if (Objects.isNull(vehicleDTO)) {
             log.error("VehicleDTO must not be null");
             throw new IllegalArgumentException("VehicleDTO must not be null");
         }
         log.info("Checking if vehicle with license plate '{}' already exists...", vehicleDTO.getLicensePlate());
         final Optional<VehicleEntity> existingVehicle = vehicleRepository.findByLicensePlate(vehicleDTO.getLicensePlate());
-        if(existingVehicle.isPresent()){
+        if (existingVehicle.isPresent()) {
             log.warn("Vehicle with license plate '{}' already exists, returning existing vehicle.", vehicleDTO.getLicensePlate());
             throw new VehicleException("Vehicle with license plate '" + vehicleDTO.getLicensePlate() + "' already exists.");
         }
@@ -64,6 +67,17 @@ public class VehicleServiceImpl implements VehicleService {
                     log.error("User with ID {} not found", vehicleDTO.getOwnerId());
                     return new IllegalArgumentException("User with ID " + vehicleDTO.getOwnerId() + " not found");
                 });
+        try {
+            final List<ImageDTO> images = new ArrayList<>();
+            for (MultipartFile imageFile : files) {
+                String uploadedUrl = s3Service.uploadFile(imageFile);
+                images.add(new ImageDTO(uploadedUrl));
+            }
+            vehicleDTO.setImages(images);
+        } catch (Exception e) {
+            log.error("Error uploading images to S3: {}", e.getMessage());
+            throw new VehicleException("Error uploading images to S3: " + e.getMessage());
+        }
         log.debug("Mapping VehicleDTO to VehicleEntity for vehicle with ID: {}", vehicleDTO.getVehicleId());
         final VehicleEntity vehicleEntity = VehicleDTOEntityMapper.map(vehicleDTO);
         log.debug("Create ImageEntity list from VehicleDTO images for vehicle with ID: {}", vehicleDTO.getVehicleId());
@@ -191,7 +205,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public VehicleDTO updateVehicleStatus(final Integer vehicleId, final Constants.VehicleStatus status) {
-        if(Objects.isNull(vehicleId) || Objects.isNull(status)) {
+        if (Objects.isNull(vehicleId) || Objects.isNull(status)) {
             log.error("Vehicle ID and status must not be null");
             throw new IllegalArgumentException("Vehicle ID and status must not be null");
         }
@@ -231,7 +245,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional(readOnly = true)
     public List<VehicleDTO> getAllVehiclesByOwnerId(final String ownerId) {
-        if(Objects.isNull(ownerId)) {
+        if (Objects.isNull(ownerId)) {
             log.error("Owner ID must not be null");
             throw new IllegalArgumentException("Owner ID must not be null");
         }

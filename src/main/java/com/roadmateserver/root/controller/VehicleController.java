@@ -15,9 +15,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -43,12 +45,13 @@ public class VehicleController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/vehicle")
+    @PostMapping(value = "/vehicle", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<VehicleDTO> registerVehicle(
-            @Parameter(description = "Vehicle details to be registered",
-                    required = true)
-            @Valid @RequestBody final VehicleDTO vehicleDTO){
-        final VehicleDTO savedVehicleDTO = vehicleService.createNewVehicle(vehicleDTO);
+            @Parameter(description = "The image files for the vehicle.", required = true)
+            @RequestPart("files") final List<MultipartFile> files,
+            @Parameter(description = "Vehicle details in JSON format.", required = true)
+            @RequestPart("vehicle") @Valid final VehicleDTO vehicleDTO){
+        final VehicleDTO savedVehicleDTO = vehicleService.createNewVehicle(vehicleDTO, files);
         return ResponseEntity.ok(savedVehicleDTO);
     }
 

@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,10 +23,10 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
 
-    @Autowired
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
+
     @Operation(summary = "Get notifications by user ID",
             description = "Fetches all notifications associated with a specific user ID.")
     @ApiResponses(value = {
@@ -41,9 +40,7 @@ public class NotificationController {
     @GetMapping(value = "/user/{userId}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<NotificationDTO>> getNotificationsByUserId(
             @Parameter(description = "ID of the user to fetch notifications for", required = true)
-            @Valid
-            @Min(value = 1, message = "User ID must be greater than 0")
-            @PathVariable("userId") final String userId) {
+            @PathVariable final String userId) {
         final List<NotificationDTO> notifications = notificationService.getNotificationsByUserId(userId);
         return ResponseEntity.ok(notifications);
     }

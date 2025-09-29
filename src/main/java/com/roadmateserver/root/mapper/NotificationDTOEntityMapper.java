@@ -17,7 +17,9 @@ public class NotificationDTOEntityMapper {
         notificationDTO.setUserId(notificationEntity.getUser().getClerkId());
         notificationDTO.setMessage(notificationEntity.getMessage());
         notificationDTO.setCreatedAt(notificationEntity.getCreatedAt());
+        notificationDTO.setNotificationType(notificationEntity.getNotificationType());
         notificationDTO.setIsRead(notificationEntity.getIsRead());
+        notificationDTO.setTitle(notificationEntity.getTitle());
         return notificationDTO;
     }
 
@@ -29,6 +31,8 @@ public class NotificationDTOEntityMapper {
         notificationEntity.setMessage(notificationDTO.getMessage());
         notificationEntity.setCreatedAt(notificationDTO.getCreatedAt());
         notificationEntity.setIsRead(notificationDTO.getIsRead());
+        notificationEntity.setTitle(notificationDTO.getTitle());
+        notificationEntity.setNotificationType(notificationDTO.getNotificationType());
         return notificationEntity;
     }
 }

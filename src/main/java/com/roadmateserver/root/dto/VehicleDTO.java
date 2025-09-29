@@ -102,9 +102,8 @@ public class VehicleDTO {
     private Integer reviewCount;
 
     @JsonProperty("available")
-    @NotNull(message = "Availability must not be null")
     @Schema(description = "Indicates if the vehicle is available for rent", example = "true")
-    private Constants.VehicleStatus vehicleStatus;
+    private Constants.VehicleStatus vehicleStatus = Constants.VehicleStatus.AVAILABLE;
 
     @JsonProperty("owner_id")
     @NotNull(message = "Owner must not be null")
@@ -112,8 +111,6 @@ public class VehicleDTO {
     private String ownerId;
 
     @JsonProperty("images")
-    @NotNull(message = "Images must not be null")
     @Schema(description = "List of images associated with the vehicle")
     private List<ImageDTO> images;
-
 }

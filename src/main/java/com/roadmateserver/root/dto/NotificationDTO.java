@@ -1,6 +1,7 @@
 package com.roadmateserver.root.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.roadmateserver.root.common.Constants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +26,16 @@ public class NotificationDTO {
     @NotBlank(message = "User ID must not be blank")
     private String userId;
 
+    @Schema(description = "Title of the notification", example = "Ride Confirmation")
+    @JsonProperty("title")
+    @NotBlank(message = "Title must not be blank")
+    private String title;
+
+    @Schema(description = "Type of the notification", example = "BOOKING")
+    @JsonProperty("notification_type")
+    @NotNull(message = "Notification type must not be null")
+    private Constants.NotificationType notificationType;
+
     @Schema(description = "Message content of the notification", example = "Your ride has been confirmed.")
     @JsonProperty("message")
     @NotBlank(message = "Message must not be blank")
@@ -36,6 +47,5 @@ public class NotificationDTO {
 
     @Schema(description = "Timestamp when the notification was created", example = "2023-10-01T12:00:00")
     @JsonProperty("created_at")
-    @NotNull(message = "Created at must not be null")
     private LocalDateTime createdAt;
 }

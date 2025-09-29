@@ -1,5 +1,6 @@
 package com.roadmateserver.root.entity;
 
+import com.roadmateserver.root.common.Constants;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,15 @@ public class NotificationEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    @Column(name = "title", nullable = false)
+    @NotBlank(message = "Title must not be blank")
+    private String title;
+
+    @Column(name = "notification_type", nullable = false)
+    @NotNull(message = "Notification type must not be null")
+    @Enumerated(EnumType.STRING)
+    private Constants.NotificationType notificationType;
+
     @Column(name = "message", nullable = false, length = 1500)
     @NotBlank(message = "Message must not be blank")
     private String message;
@@ -34,7 +44,14 @@ public class NotificationEntity {
     @NotNull(message = "Read status must not be null")
     private Boolean isRead = false;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
 }
