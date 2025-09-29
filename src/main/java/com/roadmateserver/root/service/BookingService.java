@@ -2,7 +2,6 @@ package com.roadmateserver.root.service;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.BookingDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -58,5 +58,4 @@ public class UserDTO {
     @Schema(description = "Timestamp when the user was created", example = "2023-10-01T12:00:00Z")
     @NotNull(message = "Created at date must not be null")
     private Instant createdAt;
-
 }

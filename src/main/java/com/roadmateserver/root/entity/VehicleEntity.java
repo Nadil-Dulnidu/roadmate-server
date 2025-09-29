@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"images","reviews","bookings","owner"})
 public class VehicleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -103,7 +105,7 @@ public class VehicleEntity {
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ReviewEntity> reviews;
 
-    @OneToMany(mappedBy = "vehicle")
+    @OneToMany(mappedBy = "vehicle",cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<BookingEntity> bookings = new ArrayList<>();
 
     @PrePersist
