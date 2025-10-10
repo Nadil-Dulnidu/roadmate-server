@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/listing")
 @Validated
+@Slf4j
 @Tag(name = "Vehicle Listing Management", description = "Endpoints for managing vehicle listings")
 public class VehicleController {
     private final VehicleService vehicleService;
@@ -147,10 +149,10 @@ public class VehicleController {
     @PatchMapping("/vehicle/{vehicleId}")
     public ResponseEntity<VehicleDTO> updateVehicleStatus(
             @Parameter(description = "Vehicle ID (positive integer)", required = true)
-            @Valid
             @Min(value = 1, message = "vehicle id must be a positive number")
             @PathVariable final Integer vehicleId,
             @RequestParam("status") final Constants.VehicleStatus vehicleStatus) {
+        log.info("Updating vehicle ID {} to status {}", vehicleId, vehicleStatus);
         final VehicleDTO updatedVehicleDTO = vehicleService.updateVehicleStatus(vehicleId, vehicleStatus);
         return ResponseEntity.ok(updatedVehicleDTO);
     }

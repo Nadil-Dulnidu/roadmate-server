@@ -25,6 +25,7 @@ import java.util.Base64;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
     @Value("${clerk.jwks.url}")
     private String JWKS_URL;
 

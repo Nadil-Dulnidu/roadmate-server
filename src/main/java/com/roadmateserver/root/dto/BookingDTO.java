@@ -27,6 +27,9 @@ public class BookingDTO {
     @Schema(description = "Unique identifier for the renter", example = "Renter123")
     private String renterId;
 
+    @JsonProperty("customer_name")
+    private String customerName;
+
     @JsonProperty("vehicle")
     @NotNull(message = "Vehicle must not be null")
     @Schema(description = "Details of the vehicle being booked")

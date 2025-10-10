@@ -63,4 +63,10 @@ public class Constants {
         ALERT,
         REVIEW
     }
+
+    public enum ListingStatus {
+        PENDING,
+        APPROVED,
+        CANCELED
+    }
 }

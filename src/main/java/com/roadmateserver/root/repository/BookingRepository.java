@@ -1,9 +1,6 @@
 package com.roadmateserver.root.repository;
 
-import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.entity.BookingEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -21,4 +18,7 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Integer>
      * @throws IllegalArgumentException if the provided renterId or pageable is {@code null}.
      */
     List<BookingEntity> findAllByRenter_ClerkId(String renterId);
+
+
+    List<BookingEntity> findAllByVehicle_Owner_ClerkId(String ownerId);
 }

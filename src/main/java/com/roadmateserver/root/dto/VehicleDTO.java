@@ -110,6 +110,9 @@ public class VehicleDTO {
     @Schema(description = "Unique identifier for the owner of the vehicle", example = "1")
     private String ownerId;
 
+    @JsonProperty("listing_staus")
+    private Constants.ListingStatus listingStatus;
+
     @JsonProperty("images")
     @Schema(description = "List of images associated with the vehicle")
     private List<ImageDTO> images;

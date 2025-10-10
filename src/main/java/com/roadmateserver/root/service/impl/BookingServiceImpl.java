@@ -171,4 +171,29 @@ public class BookingServiceImpl implements BookingService {
         log.info("Retrieved {} bookings", bookingDTOS.size());
         return bookingDTOS;
     }
+
+    @Override
+    public List<BookingDTO> getBookingsByOwnerId(final String ownerId, final List<Constants.BookingStatus> statuses) {
+        if (Objects.isNull(ownerId) || ownerId.isBlank()) {
+            log.error("Owner ID is null or blank");
+            throw new IllegalArgumentException("Owner ID must not be null or blank");
+        }
+        log.info("Fetching bookings for owner ID: {} with statuses: {}", ownerId, statuses);
+        final List<BookingDTO> bookingDTOS = bookingRepository.findAllByVehicle_Owner_ClerkId(ownerId)
+                .stream()
+                .map(booking -> {
+                    final VehicleDTO vehicleDTO = vehicleService.getVehicleById(booking.getVehicle().getVehicleId());
+                    log.debug("Vehicle mapped: {}", vehicleDTO);
+                    final BookingDTO bookingDTO = BookingDTOEntityMapper.map(booking);
+                    log.debug("Booking mapped: {}", bookingDTO);
+                    bookingDTO.setVehicle(vehicleDTO);
+                    return bookingDTO;
+                })
+                .filter(bookingDTO -> statuses == null || statuses.isEmpty() || statuses.contains(bookingDTO.getStatus()))
+                .toList();
+        log.info("Retrieved {} bookings", bookingDTOS.size());
+        return bookingDTOS;
+    }
+
+
 }

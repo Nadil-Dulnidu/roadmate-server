@@ -14,6 +14,7 @@ public class BookingDTOEntityMapper {
         if(Objects.isNull(bookingEntity.getRenter()))
             throw new IllegalArgumentException("Renter cannot be null in BookingEntity");
         bookingDTO.setRenterId(bookingEntity.getRenter().getClerkId());
+        bookingDTO.setCustomerName(bookingEntity.getRenter().getFirstName() + " " + bookingEntity.getRenter().getLastName());
         bookingDTO.setStartDate(bookingEntity.getStartDate());
         bookingDTO.setEndDate(bookingEntity.getEndDate());
         bookingDTO.setStatus(bookingEntity.getStatus());

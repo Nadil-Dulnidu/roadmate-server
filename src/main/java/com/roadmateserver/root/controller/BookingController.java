@@ -142,4 +142,26 @@ public class BookingController {
         final List<BookingDTO> bookings = bookingService.getBookingsByRenterId(renterId, statuses);
         return ResponseEntity.ok(bookings);
     }
+
+    @Operation(summary = "Get bookings by owner ID",
+            description = "Retrieve all bookings for vehicles owned by a specific owner using their unique identifier.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = BookingDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid owner ID"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping(value = "/owner/{ownerId}", produces = Constants.APPLICATION_JSON )
+    public ResponseEntity<List<BookingDTO>> getBookingsByOwnerId(
+            @Parameter(description = "Owner ID to fetch bookings for", required = true)
+            @Valid
+            @PathVariable("ownerId") final String ownerId,
+            @Parameter(description = "Filter bookings by status")
+            @RequestParam(required = false, value = "status") List<Constants.BookingStatus> statuses
+    ) {
+        final List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId, statuses);
+        return ResponseEntity.ok(bookings);
+    }
 }
