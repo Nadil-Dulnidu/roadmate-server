@@ -82,7 +82,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @Operation(summary = "Get all users", description = "Retrieve all users, optionally filtered by first name, email, or role.")
+    @Operation(summary = "Get all users", description = "Retrieve all users, optionally filtered by role.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Users retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "No users found"),
@@ -91,14 +91,10 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
     @GetMapping(produces = Constants.APPLICATION_JSON)
-    public ResponseEntity<Iterable<UserDTO>> getAllUsers(
+    public ResponseEntity<List<UserDTO>> getAllUsers(
             @Parameter(description = "Filter by first name")
-            @RequestParam(value = "firstName", required = false) List<String> firstNameFilter,
-            @Parameter(description = "Filter by email")
-            @RequestParam(value = "email", required = false) List<String> emailFilter,
-            @Parameter(description = "Filter by role")
-            @RequestParam(value = "role", required = false) String roleFilter) {
-        final Iterable<UserDTO> users = userService.getAllUsers(firstNameFilter, emailFilter, roleFilter);
+            @RequestParam(value = "role", required = false) List<Constants.UserRole> userRoles) {
+        final List<UserDTO> users = userService.getAllUsers(userRoles);
         return ResponseEntity.ok(users);
     }
 

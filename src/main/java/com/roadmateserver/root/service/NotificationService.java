@@ -1,9 +1,11 @@
 package com.roadmateserver.root.service;
 
+import com.roadmateserver.root.dto.AnnouncementRequestDTO;
 import com.roadmateserver.root.dto.NotificationDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public interface NotificationService {
@@ -41,8 +43,11 @@ public interface NotificationService {
      */
     NotificationDTO deleteNotification(Integer notificationId);
 
-
-
-
-
+    /**
+     * Creates an announcement notification.
+     *
+     * @param announcementRequestDTO the details of the announcement to be created
+     * @return a NotificationDTO containing the details of the created announcement notification
+     */
+    void createAnnouncementNotification(AnnouncementRequestDTO announcementRequestDTO);
 }

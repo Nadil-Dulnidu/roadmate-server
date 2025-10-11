@@ -1,6 +1,7 @@
 package com.roadmateserver.root.controller;
 
 import com.roadmateserver.root.common.Constants;
+import com.roadmateserver.root.dto.AnnouncementRequestDTO;
 import com.roadmateserver.root.dto.NotificationDTO;
 import com.roadmateserver.root.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -102,5 +103,21 @@ public class NotificationController {
             @PathVariable("notificationId") final Integer notificationId) {
         final NotificationDTO updatedNotification = notificationService.markNotificationAsRead(notificationId);
         return ResponseEntity.ok(updatedNotification);
+    }
+
+    @PostMapping(value = "/announcement", consumes = Constants.APPLICATION_JSON)
+    @Operation(summary = "Create an announcement notification",
+            description = "Creates an announcement notification to be sent to all users.")    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Announcement notification created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid announcement data provided"),
+            @ApiResponse(responseCode = "500", description = "Internal server error"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+    })
+    public ResponseEntity<Void> createAnnouncementNotification(
+            @Parameter(description = "Announcement details to be created", required = true)
+            @Valid @RequestBody final AnnouncementRequestDTO announcementRequestDTO) {
+        notificationService.createAnnouncementNotification(announcementRequestDTO);
+        return ResponseEntity.ok().build();
     }
 }

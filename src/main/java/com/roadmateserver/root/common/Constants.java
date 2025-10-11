@@ -61,7 +61,8 @@ public class Constants {
         VEHICLE,
         REMINDER,
         ALERT,
-        REVIEW
+        REVIEW,
+        ANNOUNCEMENT
     }
 
     public enum ListingStatus {

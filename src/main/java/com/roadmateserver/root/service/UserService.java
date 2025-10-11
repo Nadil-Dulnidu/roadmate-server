@@ -29,9 +29,7 @@ public interface UserService {
      * @throws UserException if there is an error retrieving the users
      */
     List<UserDTO> getAllUsers(
-            final List<String> firstNameFilter,
-            final List<String> emailFilter,
-            final String roleFilter
+            List<Constants.UserRole> userRoles
     );
 
     /**

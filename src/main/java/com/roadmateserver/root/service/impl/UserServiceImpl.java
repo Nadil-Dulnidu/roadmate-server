@@ -68,20 +68,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<UserDTO> getAllUsers(
-            final List<String> firstNameFilter,
-            final List<String> emailFilter,
-            final String roleFilter) {
-        log.info("Fetching all users with filters - firstName: {}, email: {}, role: {}",
-                firstNameFilter, emailFilter, roleFilter);
+            final List<Constants.UserRole> userRoles) {
+        log.info("Fetching all users with filters - Roles: {}",
+                 userRoles);
         final List<UserEntity> userEntities = userRepository.findAll();
         final List<UserDTO> result = userEntities
                 .stream()
-                .filter(user -> firstNameFilter == null || firstNameFilter.isEmpty()
-                        || firstNameFilter.contains(user.getFirstName()))
-                .filter(user -> emailFilter == null || emailFilter.isEmpty()
-                        || emailFilter.contains(user.getEmail()))
-                .filter(user -> roleFilter == null || roleFilter.isEmpty()
-                        || user.getRole().toString().equalsIgnoreCase(roleFilter))
+                .filter(user -> userRoles == null || userRoles.isEmpty()
+                        || userRoles.contains(user.getRole()))
                 .map(user -> {
                     log.debug("Mapping UserEntity to UserDTO for user with id: {}", user.getUserId());
                     return UserDTOEntityMapper.map(user);

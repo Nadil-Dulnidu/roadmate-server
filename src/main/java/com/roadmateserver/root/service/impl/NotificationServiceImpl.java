@@ -1,5 +1,7 @@
 package com.roadmateserver.root.service.impl;
 
+import com.roadmateserver.root.common.Constants;
+import com.roadmateserver.root.dto.AnnouncementRequestDTO;
 import com.roadmateserver.root.dto.NotificationDTO;
 import com.roadmateserver.root.entity.NotificationEntity;
 import com.roadmateserver.root.entity.UserEntity;
@@ -9,13 +11,18 @@ import com.roadmateserver.root.mapper.NotificationDTOEntityMapper;
 import com.roadmateserver.root.repository.NotificationRepository;
 import com.roadmateserver.root.repository.UserRepository;
 import com.roadmateserver.root.service.NotificationService;
+import com.roadmateserver.root.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -103,5 +110,37 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.delete(notificationEntity);
         log.info("Notification deleted successfully with ID: {}", notificationId);
         return NotificationDTOEntityMapper.map(notificationEntity);
+    }
+
+    @Async
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createAnnouncementNotification(final AnnouncementRequestDTO announcementRequestDTO) {
+        if (Objects.isNull(announcementRequestDTO) || announcementRequestDTO.getMessage().isBlank()) {
+            log.error("Announcement details cannot be null or blank");
+            throw new NotificationException("Announcement details cannot be null or blank");
+        }
+        log.info("Creating announcement notification: {}", announcementRequestDTO);
+        final List<Constants.UserRole> roles = new ArrayList<>();
+        roles.add(Constants.UserRole.RENTER);
+        roles.add(Constants.UserRole.OWNER);
+        final List<UserEntity> userEntities = userRepository.findAllByRoleIn(roles);
+        if (userEntities.isEmpty()) {
+            log.warn("No users found for announcement");
+            throw new NotificationException("No users found for announcement");
+        }
+        final List<NotificationEntity> notificationsToSave = userEntities.stream()
+                .map(user -> {
+                    final NotificationEntity notification = new NotificationEntity();
+                    notification.setUser(user);
+                    notification.setTitle(announcementRequestDTO.getTitle());
+                    notification.setMessage(announcementRequestDTO.getMessage());
+                    notification.setNotificationType(Constants.NotificationType.ANNOUNCEMENT);
+                    notification.setIsRead(false);
+                    return notification;
+                })
+                .collect(Collectors.toList());
+        notificationRepository.saveAll(notificationsToSave);
+        log.info("Announcement notifications created successfully for {} users", notificationsToSave.size());
     }
 }
