@@ -135,8 +135,7 @@ public class NotificationServiceImpl implements NotificationService {
                     notification.setUser(user);
                     notification.setTitle(announcementRequestDTO.getTitle());
                     notification.setMessage(announcementRequestDTO.getMessage());
-                    notification.setNotificationType(Constants.NotificationType.ANNOUNCEMENT);
-                    notification.setIsRead(false);
+                    notification.setNotificationType(announcementRequestDTO.getNotificationType());
                     return notification;
                 })
                 .collect(Collectors.toList());

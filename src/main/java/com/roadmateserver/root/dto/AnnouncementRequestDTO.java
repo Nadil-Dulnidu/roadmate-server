@@ -17,8 +17,7 @@ public class AnnouncementRequestDTO {
     private String title;
 
     @JsonProperty("notification_type")
-    @NotBlank(message = "Announcement type cannot be blank")
-    private Constants.NotificationType notificationType;
+    private Constants.NotificationType notificationType = Constants.NotificationType.ALERT;
 
     @JsonProperty("message")
     @NotBlank(message = "Announcement message cannot be blank")
