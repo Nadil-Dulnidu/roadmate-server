@@ -9,7 +9,7 @@ public class VehicleDTOEntityMapper {
     public static VehicleDTO map(final VehicleEntity vehicleEntity) {
         if (Objects.isNull(vehicleEntity))
             throw new IllegalArgumentException("VehicleDTO must not be null");
-        VehicleDTO dto = new VehicleDTO();
+        final VehicleDTO dto = new VehicleDTO();
         dto.setVehicleId(vehicleEntity.getVehicleId());
         dto.setBrand(vehicleEntity.getBrand());
         dto.setModel(vehicleEntity.getModel());
@@ -28,6 +28,9 @@ public class VehicleDTOEntityMapper {
         dto.setReviewCount(vehicleEntity.getReviewCount());
         dto.setRating(vehicleEntity.getReviewRating());
         dto.setVehicleStatus(vehicleEntity.getIsAvailable());
+        dto.setListingStatus(vehicleEntity.getListingStatus());
+        dto.setListingDate(vehicleEntity.getListingDate());
+        dto.setBasePrice(vehicleEntity.getBasePrice());
         if(Objects.isNull(vehicleEntity.getOwner()))
             throw new IllegalArgumentException("Owner must not be null in VehicleEntity");
         dto.setOwnerId(vehicleEntity.getOwner().getClerkId());
@@ -50,13 +53,14 @@ public class VehicleDTOEntityMapper {
         entity.setLocation(vehicleDTO.getLocation());
         entity.setCity(vehicleDTO.getCity());
         entity.setDescription(vehicleDTO.getDescription());
-        entity.setPricePerDay(vehicleDTO.getPricePerDay());
         entity.setVehicleType(vehicleDTO.getVehicleType());
         entity.setIsAvailable(vehicleDTO.getVehicleStatus());
         entity.setContactNumber(vehicleDTO.getContactNumber());
         entity.setReviewCount(vehicleDTO.getReviewCount());
         entity.setReviewRating(vehicleDTO.getRating());
+        entity.setListingStatus(vehicleDTO.getListingStatus());
+        entity.setListingDate(vehicleDTO.getListingDate());
+        entity.setBasePrice(vehicleDTO.getBasePrice());
         return entity;
-
     }
 }

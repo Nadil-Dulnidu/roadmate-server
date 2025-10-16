@@ -1,6 +1,8 @@
 package com.roadmateserver.root.service.impl;
 
 import com.roadmateserver.root.common.Constants;
+import com.roadmateserver.root.components.ServiceFeeStrategy;
+import com.roadmateserver.root.components.ServiceFeeStrategyFactory;
 import com.roadmateserver.root.dto.ImageDTO;
 import com.roadmateserver.root.dto.VehicleDTO;
 import com.roadmateserver.root.entity.ImageEntity;
@@ -16,9 +18,6 @@ import com.roadmateserver.root.repository.VehicleRepository;
 import com.roadmateserver.root.service.S3Service;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,16 +34,19 @@ public class VehicleServiceImpl implements VehicleService {
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final ServiceFeeStrategyFactory  serviceFeeStrategyFactory;
 
     public VehicleServiceImpl(
             VehicleRepository vehicleRepository,
             ImageRepository imageRepository,
             UserRepository userRepository,
-            S3Service S3Service) {
+            S3Service S3Service,
+            ServiceFeeStrategyFactory serviceFeeStrategyFactory) {
         this.vehicleRepository = vehicleRepository;
         this.imageRepository = imageRepository;
         this.userRepository = userRepository;
         this.s3Service = S3Service;
+        this.serviceFeeStrategyFactory = serviceFeeStrategyFactory;
     }
 
     @Override
@@ -90,6 +92,8 @@ public class VehicleServiceImpl implements VehicleService {
                 }).toList();
         vehicleEntity.setImages(imageEntities);
         vehicleEntity.setOwner(userEntity);
+        final Double pricePerDay = calculateTotalPrice(vehicleDTO);
+        vehicleEntity.setPricePerDay(pricePerDay);
         log.debug("Saving VehicleEntity to repository for vehicle with ID: {}", vehicleDTO.getVehicleId());
         final VehicleEntity savedVehicleEntity = vehicleRepository.save(vehicleEntity);
         log.debug("Saving ImageEntities to repository for vehicle with ID: {}", savedVehicleEntity.getVehicleId());
@@ -108,7 +112,8 @@ public class VehicleServiceImpl implements VehicleService {
             throw new IllegalArgumentException("VehicleDTO must not be null");
         }
         log.info("Updating vehicle with ID: {}", vehicleDTO.getVehicleId());
-        final VehicleEntity existingVehicle = vehicleRepository.findById(vehicleDTO.getVehicleId())
+        final VehicleEntity existingVehicle = vehicleRepository
+                .findById(vehicleDTO.getVehicleId())
                 .orElseThrow(() -> {
                     log.error("Vehicle not found with ID: {}", vehicleDTO.getVehicleId());
                     return new VehicleNotFoundException("Vehicle not found with ID: " + vehicleDTO.getVehicleId());
@@ -123,7 +128,6 @@ public class VehicleServiceImpl implements VehicleService {
         existingVehicle.setPricePerDay(vehicleDTO.getPricePerDay());
         existingVehicle.setVehicleType(vehicleDTO.getVehicleType());
         existingVehicle.setContactNumber(vehicleDTO.getContactNumber());
-
         log.info("Updated base fields for vehicle ID: {}", existingVehicle.getVehicleId());
         final List<ImageDTO> imageDTOs = vehicleDTO.getImages();
         log.debug("Clearing old images for vehicle ID: {}", existingVehicle.getVehicleId());
@@ -185,24 +189,6 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<VehicleDTO> getVehicles() {
-        log.info("Fetching all vehicles...");
-        final List<VehicleEntity> vehicleEntities = vehicleRepository.findAll();
-        final List<VehicleDTO> vehicleDTOs = vehicleEntities.stream()
-                .map(vehicleEntity -> {
-                    final VehicleDTO vehicleDTO = VehicleDTOEntityMapper.map(vehicleEntity);
-                    final List<ImageDTO> imageDTOs = vehicleEntity.getImages().stream()
-                            .map(ImageDTOEntityMapper::map)
-                            .toList();
-                    vehicleDTO.setImages(imageDTOs);
-                    return vehicleDTO;
-                }).toList();
-        log.info("Fetched {} vehicles successfully.", vehicleDTOs.size());
-        return vehicleDTOs;
-    }
-
-    @Override
     @Transactional(rollbackFor = Exception.class)
     public VehicleDTO updateVehicleStatus(final Integer vehicleId, final Constants.VehicleStatus status) {
         if (Objects.isNull(vehicleId) || Objects.isNull(status)) {
@@ -226,10 +212,12 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<VehicleDTO> getVehiclesByPage(final Integer pageNumber, final Integer pageSize, final String VehicleName) {
-        log.info("Fetching all vehicles...");
-        final Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        final Page<VehicleDTO> vehicleDTOs = vehicleRepository.findAll(VehicleName, pageable)
+    public List<VehicleDTO> getAllVehicles(List<Constants.ListingStatus> statuses, List<Constants.VehicleStatus> vehicleStatuses) {
+        log.info("Fetching all vehicles with filters...");
+        final List<VehicleEntity> vehicleEntities = vehicleRepository.findAll();
+        final List<VehicleDTO> vehicleDTOs = vehicleEntities.stream()
+                .filter(vehicleEntity -> (statuses == null || statuses.isEmpty() || statuses.contains(vehicleEntity.getListingStatus())))
+                .filter(vehicleEntity -> (vehicleStatuses == null || vehicleStatuses.isEmpty() || vehicleStatuses.contains(vehicleEntity.getIsAvailable())))
                 .map(vehicleEntity -> {
                     final VehicleDTO vehicleDTO = VehicleDTOEntityMapper.map(vehicleEntity);
                     final List<ImageDTO> imageDTOs = vehicleEntity.getImages().stream()
@@ -237,9 +225,35 @@ public class VehicleServiceImpl implements VehicleService {
                             .toList();
                     vehicleDTO.setImages(imageDTOs);
                     return vehicleDTO;
-                });
-        log.info("Fetched vehicles successfully.");
+                }).toList();
+        log.info("Fetched {} vehicles successfully.", vehicleDTOs.size());
         return vehicleDTOs;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public VehicleDTO updateListingStatus(Integer vehicleId, Constants.ListingStatus listingStatus) {
+        if (Objects.isNull(vehicleId) || Objects.isNull(listingStatus)) {
+            log.error("Vehicle ID and listing status must not be null");
+            throw new IllegalArgumentException("Vehicle ID and listing status must not be null");
+        }
+        log.info("Updating vehicle listing status for vehicle ID: {} to listing status: {}", vehicleId, listingStatus);
+        final VehicleEntity vehicleEntity = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> {
+                    log.error("Vehicle not found with id: {}", vehicleId);
+                    return new VehicleNotFoundException("Vehicle not found with id: " + vehicleId);
+                });
+        if(!vehicleEntity.getListingStatus().equals(Constants.ListingStatus.PENDING)){
+            log.error("Only vehicles with PENDING listing status can be updated. Current status: {}", vehicleEntity.getListingStatus());
+            throw new IllegalArgumentException("Only vehicles with PENDING listing status can be updated.");
+        }
+        vehicleEntity.setListingStatus(listingStatus);
+        log.debug("Saving updated VehicleEntity with ID: {}", vehicleId);
+        final VehicleEntity updatedVehicleEntity = vehicleRepository.save(vehicleEntity);
+        log.debug("Mapping updated VehicleEntity to VehicleDTO for vehicle ID: {}", updatedVehicleEntity.getVehicleId());
+        final VehicleDTO updatedVehicleDTO = VehicleDTOEntityMapper.map(updatedVehicleEntity);
+        log.info("Vehicle listing status updated successfully for vehicle ID: {}", updatedVehicleDTO.getVehicleId());
+        return updatedVehicleDTO;
     }
 
     @Override
@@ -269,5 +283,14 @@ public class VehicleServiceImpl implements VehicleService {
                 .toList();
         log.info("Fetched {} vehicles successfully.", vehicleDTOs.size());
         return vehicleDTOs;
+    }
+
+    //helper method for calculate total rental price
+    public double calculateTotalPrice(final VehicleDTO vehicle) {
+        log.info("Calculating total price for vehicle: {}", vehicle.getVehicleId());
+        final ServiceFeeStrategy strategy = serviceFeeStrategyFactory.getStrategy(vehicle.getVehicleType());
+        final Double service = strategy.calculateServiceFee(vehicle.getBasePrice());
+        log.info("Calculated total price for {}: {}", vehicle.getVehicleType(), vehicle.getVehicleId());
+        return vehicle.getBasePrice() + service;
     }
 }

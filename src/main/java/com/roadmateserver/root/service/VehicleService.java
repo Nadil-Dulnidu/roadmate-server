@@ -2,7 +2,6 @@ package com.roadmateserver.root.service;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.VehicleDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import com.roadmateserver.root.exception.VehicleException;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,12 +53,6 @@ public interface VehicleService {
     VehicleDTO deleteVehicle(Integer vehicleId);
 
     /**
-     * Retrieves all vehicles in the system.
-     * @return a list of all vehicles as VehicleDTOs. Never null, but may be empty.
-     */
-    List<VehicleDTO> getVehicles();
-
-    /**
      * Retrieves all vehicles owned by a specific owner.
      *
      * @param ownerId the unique identifier of the owner whose vehicles are to be retrieved.
@@ -79,13 +72,23 @@ public interface VehicleService {
     VehicleDTO updateVehicleStatus(Integer vehicleId, Constants.VehicleStatus vehicleStatus);
 
     /**
-     * Retrieves a paginated list of vehicles, optionally filtered by vehicle names.
+     * Retrieves all vehicles in the system, optionally filtered by listing status and vehicle status.
      *
-     * @param pageNumber the page number to retrieve (0-based index).
-     * @param pageSize the number of vehicles per page.
-     * @param VehicleNames an optional list of vehicle names to filter the results. If null or empty, no filtering is applied.
-     * @return a Page of VehicleDTOs representing the requested page of vehicles.
-     * @throws IllegalArgumentException if pageNumber or pageSize are null or invalid.
+     * @param statuses a list of listing statuses to filter the vehicles by; can be null or empty to include all statuses.
+     * @param vehicleStatuses a list of vehicle statuses to filter the vehicles by; can be null or empty to include all statuses.
+     * @return a list of VehicleDTOs representing the vehicles that match the specified filters. Never null, but may be empty.
      */
-    Page<VehicleDTO> getVehiclesByPage(Integer pageNumber, Integer pageSize, String VehicleNames);
+    List<VehicleDTO> getAllVehicles(List<Constants.ListingStatus> statuses, List<Constants.VehicleStatus> vehicleStatuses);
+
+
+    /**
+     * Updates the listing status of a vehicle.
+     *
+     * @param vehicleId the unique identifier of the vehicle whose listing status is to be updated.
+     * @param listingStatus the new listing status to set for the vehicle.
+     * @return the updated VehicleDTO with the new listing status.
+     * @throws IllegalArgumentException if the vehicleId is null or invalid, or if the listingStatus is null.
+     * @throws VehicleException if the vehicle with the specified ID does not exist or cannot be updated.
+     */
+    VehicleDTO updateListingStatus(Integer vehicleId, Constants.ListingStatus listingStatus);
 }

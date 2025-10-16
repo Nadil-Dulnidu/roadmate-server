@@ -29,15 +29,4 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Integer>
      * @return a list of VehicleEntity objects owned by the specified user
      */
     List<VehicleEntity> findByOwner(UserEntity owner);
-
-
-    /**
-     * Finds all vehicles with optional filtering by model name and pagination support.
-     *
-     * @param name     the model name to filter by (case-insensitive, partial match); if null or empty, no filtering is applied
-     * @param pageable the pagination information
-     * @return a page of VehicleEntity objects matching the criteria
-     */
-    @Query("SELECT v FROM VehicleEntity v WHERE (:name IS NULL OR :name = '' OR LOWER(v.model) LIKE LOWER(CONCAT('%', :name, '%')))")
-    Page<VehicleEntity> findAll(String name, Pageable pageable);
 }

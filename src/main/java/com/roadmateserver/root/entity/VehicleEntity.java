@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +72,10 @@ public class VehicleEntity {
     @NotNull(message = "Price per day must not be null")
     private Double pricePerDay;
 
+    @Column(name = "base_price")
+    @NotNull(message = "Base price must not be null")
+    private Double basePrice;
+
     @Column(name = "location", nullable = false)
     @NotBlank(message = "Location must not be blank")
     private String location;
@@ -92,7 +97,15 @@ public class VehicleEntity {
     @Column(name = "availability", nullable = false)
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Availability must not be null")
-    private Constants.VehicleStatus isAvailable = Constants.VehicleStatus.AVAILABLE;
+    private Constants.VehicleStatus isAvailable;
+
+    @NotNull(message = "Listing status must not be null")
+    @Column(name = "listing_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Constants.ListingStatus listingStatus;
+
+    @Column(name = "listing_date")
+    private LocalDateTime listingDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner_id", nullable = false)
@@ -115,6 +128,9 @@ public class VehicleEntity {
         }
         if(reviewRating == null) {
             reviewRating = 0.0;
+        }
+        if (listingDate == null) {
+            listingDate = LocalDateTime.now();
         }
     }
 }
