@@ -21,7 +21,7 @@ public interface BookingService {
      * Retrieves all bookings in the system, optionally filtered by user ID and vehicle ID.
      * @return a list of all booking data transfer objects matching the filters. Never {@code null}, but may be empty.
      */
-    List<BookingDTO> getAllBookings();
+    List<BookingDTO> getAllBookings(List<Constants.BookingStatus> statuses);
 
     /**
      * Deletes a booking by its unique identifier.
@@ -49,16 +49,20 @@ public interface BookingService {
     BookingDTO updateBookingStatus(Integer bookingId, Constants.BookingStatus bookingStatus);
 
     /**
-     * Retrieves bookings made by a specific renter, optionally filtered by booking status, with pagination support.
+     * Retrieves bookings made by a specific renter, optionally filtered by booking status.
      * @param renterId the ID of the renter whose bookings are to be retrieved; must not be {@code null}.
-     * @param status the status to filter bookings by; can be {@code null} to retrieve all statuses.
-     * @param page the page number to retrieve (0-based index); must be a non-negative integer.
-     * @param size the number of records per page; must be a positive integer.
-     * @return a paginated list of booking data transfer objects matching the criteria.
-     * @throws IllegalArgumentException if the provided renterId is {@code null} or if page/size parameters are invalid.
+     * @param statuses the list of booking statuses to filter by; can be {@code null} or empty to retrieve all statuses.
+     * @return a list of booking data transfer objects matching the criteria.
+     * @throws IllegalArgumentException if the provided renterId is {@code null}.
      */
     List<BookingDTO> getBookingsByRenterId(String renterId, List<Constants.BookingStatus> statuses);
 
-
+    /**
+     * Retrieves bookings for vehicles owned by a specific owner, optionally filtered by booking status.
+     * @param ownerId the ID of the owner whose vehicle bookings are to be retrieved; must not be {@code null}.
+     * @param statuses the list of booking statuses to filter by; can be {@code null} or empty to retrieve all statuses.
+     * @return a list of booking data transfer objects matching the criteria.
+     * @throws IllegalArgumentException if the provided ownerId is {@code null}.
+     */
     List<BookingDTO> getBookingsByOwnerId(String ownerId, List<Constants.BookingStatus> statuses);
 }

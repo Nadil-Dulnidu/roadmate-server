@@ -16,7 +16,6 @@ import com.roadmateserver.root.repository.UserRepository;
 import com.roadmateserver.root.service.BookingService;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,10 +66,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDTO> getAllBookings() {
+    public List<BookingDTO> getAllBookings(List<Constants.BookingStatus> statuses) {
         log.info("Getting all bookings");
         final List<BookingDTO> bookingDTOS = bookingRepository.findAll()
                 .stream()
+                .filter(booking -> statuses == null || statuses.isEmpty() || statuses.contains(booking.getStatus()))
                 .map(booking -> {
                     final VehicleDTO vehicleDTO = vehicleService.getVehicleById(booking.getVehicle().getVehicleId());
                     log.debug("Vehicle mapped: {}", vehicleDTO);
@@ -194,6 +194,4 @@ public class BookingServiceImpl implements BookingService {
         log.info("Retrieved {} bookings", bookingDTOS.size());
         return bookingDTOS;
     }
-
-
 }

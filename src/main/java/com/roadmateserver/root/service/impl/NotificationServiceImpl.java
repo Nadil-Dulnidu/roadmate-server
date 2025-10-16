@@ -11,7 +11,6 @@ import com.roadmateserver.root.mapper.NotificationDTOEntityMapper;
 import com.roadmateserver.root.repository.NotificationRepository;
 import com.roadmateserver.root.repository.UserRepository;
 import com.roadmateserver.root.service.NotificationService;
-import com.roadmateserver.root.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
