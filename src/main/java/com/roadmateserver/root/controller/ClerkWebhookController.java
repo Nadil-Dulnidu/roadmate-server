@@ -6,10 +6,6 @@ import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.UserDTO;
 import com.roadmateserver.root.exception.ClerkException;
 import com.roadmateserver.root.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +19,6 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/clerk")
-@Tag(name = "Clerk Webhook", description = "Endpoints for handling Clerk webhooks")
 public class ClerkWebhookController {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final UserService userService;
@@ -31,20 +26,9 @@ public class ClerkWebhookController {
     ClerkWebhookController(UserService userService) {
         this.userService = userService;
     }
-    @Operation(
-            summary = "Handle Clerk user webhook",
-            description = "Handles `user.created` and `user.updated` events from Clerk and maps to internal StudentDTO logic.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "User processed successfully (created or updated)"),
-                    @ApiResponse(responseCode = "400", description = "Bad request or missing fields"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden")
-            }
-    )
+
     @PostMapping("/user")
     public ResponseEntity<?> handleClerkUser(
-            @Parameter(description = "Raw JSON body from Clerk webhook")
             @RequestBody final String rawBody) throws ClerkException {
         try {
             final Map<String, Object> body = objectMapper.readValue(rawBody, Map.class);
@@ -79,7 +63,6 @@ public class ClerkWebhookController {
                     Constants.UserRole.RENTER,
                     createdAtDateTime
             );
-            System.out.println("UserDTO: " + userDTO);
             final UserDTO savedUser = userService.createUser(userDTO);
             userService.assignStudentRole(userId, Constants.UserRole.RENTER);
             return new ResponseEntity<>(savedUser, HttpStatus.OK);
