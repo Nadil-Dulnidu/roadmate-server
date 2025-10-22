@@ -1,8 +1,10 @@
 package com.roadmateserver.root.controller;
 
+import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.ListingCountProjection;
 import com.roadmateserver.root.repository.BookingRepository;
 import com.roadmateserver.root.repository.VehicleRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@PreAuthorize(Constants.ADMIN_OR_STAFF_ROLE_PERMISSION)
 @RequestMapping("/audit")
 public class AuditController {
 

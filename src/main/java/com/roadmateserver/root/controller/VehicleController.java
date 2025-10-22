@@ -5,8 +5,6 @@ import com.roadmateserver.root.dto.VehicleDTO;
 import com.roadmateserver.root.service.VehicleService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -83,7 +81,6 @@ public class VehicleController {
         return ResponseEntity.ok(updatedVehicleDTO);
     }
 
-    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @GetMapping("/vehicle/owner/{ownerId}")
     public ResponseEntity<List<VehicleDTO>> getAllVehiclesByOwnerId(
             @PathVariable final String ownerId) {

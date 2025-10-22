@@ -47,8 +47,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/listing/vehicle/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/review/vehicle/**").permitAll()
                         .requestMatchers("/clerk/**").permitAll()
-                        .requestMatchers("/audit/**").hasAnyRole("ADMIN", "STAFF")
+                        .requestMatchers("/audit/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(clerkPublicKey()), UsernamePasswordAuthenticationFilter.class)

@@ -34,7 +34,6 @@ public class ReviewController {
         return ResponseEntity.ok(createdReview);
     }
 
-    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @GetMapping(value = "/vehicle/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<ReviewDTO>> getReviewsForVehicle(
             @Min(value = 1, message = "id must be a positive integer")

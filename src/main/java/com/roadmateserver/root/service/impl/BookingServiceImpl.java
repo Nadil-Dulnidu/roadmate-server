@@ -26,8 +26,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
-import static org.hibernate.validator.internal.engine.messageinterpolation.el.RootResolver.FORMATTER;
-
 @Service
 @Slf4j
 public class BookingServiceImpl implements BookingService {
@@ -216,44 +214,44 @@ public class BookingServiceImpl implements BookingService {
         return bookingDTOS;
     }
 
-    @Transactional
-    @Scheduled(cron = "0 5 0 * * *")
-    public void activateBookingsBasedOnPickupDate() {
-        LocalDate today = LocalDate.now();
-        log.info("Running booking activation scheduler for date: {}", today);
-
-        List<BookingEntity> bookings = bookingRepository.findAll();
-        for (BookingEntity booking : bookings) {
-            LocalDate startDate = LocalDate.parse(booking.getStartDate(), FORMATTER);
-            if (startDate.equals(today) && booking.getStatus() == Constants.BookingStatus.CONFIRMED) {
-                booking.setStatus(Constants.BookingStatus.ACTIVE);
-                bookingRepository.save(booking);
-                log.info("Activated booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
-            }
-        }
-    }
-
-    @Transactional
-    @Scheduled(cron = "0 55 23 * * *")
-    public void completeBookingsBasedOnReturnDate() {
-        LocalDate today = LocalDate.now();
-        log.info("Running booking completion scheduler for date: {}", today);
-
-        List<BookingEntity> bookings = bookingRepository.findAll();
-        for (BookingEntity booking : bookings) {
-            LocalDate endDate = LocalDate.parse(booking.getEndDate(), FORMATTER);
-            if (endDate.equals(today) && booking.getStatus() == Constants.BookingStatus.ACTIVE) {
-                booking.setStatus(Constants.BookingStatus.COMPLETED);
-                final VehicleEntity vehicleEntity = vehicleRepository.findById(booking.getVehicle().getVehicleId())
-                        .orElseThrow(() -> {
-                            log.error("Vehicle with ID {} not found", booking.getVehicle().getVehicleId());
-                            return new BookingException("Vehicle not found");
-                        });
-                vehicleEntity.setIsAvailable(Constants.VehicleStatus.AVAILABLE);
-                vehicleRepository.save(vehicleEntity);
-                bookingRepository.save(booking);
-                log.info("Completed booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
-            }
-        }
-    }
+//    @Transactional
+//    @Scheduled(cron = "0 5 0 * * *")
+//    public void activateBookingsBasedOnPickupDate() {
+//        LocalDate today = LocalDate.now();
+//        log.info("Running booking activation scheduler for date: {}", today);
+//
+//        List<BookingEntity> bookings = bookingRepository.findAll();
+//        for (BookingEntity booking : bookings) {
+//            LocalDate startDate = LocalDate.parse(booking.getStartDate(), FORMATTER);
+//            if (startDate.equals(today) && booking.getStatus() == Constants.BookingStatus.CONFIRMED) {
+//                booking.setStatus(Constants.BookingStatus.ACTIVE);
+//                bookingRepository.save(booking);
+//                log.info("Activated booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
+//            }
+//        }
+//    }
+//
+//    @Transactional
+//    @Scheduled(cron = "0 55 23 * * *")
+//    public void completeBookingsBasedOnReturnDate() {
+//        LocalDate today = LocalDate.now();
+//        log.info("Running booking completion scheduler for date: {}", today);
+//
+//        List<BookingEntity> bookings = bookingRepository.findAll();
+//        for (BookingEntity booking : bookings) {
+//            LocalDate endDate = LocalDate.parse(booking.getEndDate(), FORMATTER);
+//            if (endDate.equals(today) && booking.getStatus() == Constants.BookingStatus.ACTIVE) {
+//                booking.setStatus(Constants.BookingStatus.COMPLETED);
+//                final VehicleEntity vehicleEntity = vehicleRepository.findById(booking.getVehicle().getVehicleId())
+//                        .orElseThrow(() -> {
+//                            log.error("Vehicle with ID {} not found", booking.getVehicle().getVehicleId());
+//                            return new BookingException("Vehicle not found");
+//                        });
+//                vehicleEntity.setIsAvailable(Constants.VehicleStatus.AVAILABLE);
+//                vehicleRepository.save(vehicleEntity);
+//                bookingRepository.save(booking);
+//                log.info("Completed booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
+//            }
+//        }
+//    }
 }
