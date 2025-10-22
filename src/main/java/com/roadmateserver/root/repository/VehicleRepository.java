@@ -1,5 +1,6 @@
 package com.roadmateserver.root.repository;
 
+import com.roadmateserver.root.dto.ListingCountProjection;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.entity.VehicleEntity;
 import org.springframework.data.domain.Page;
@@ -29,4 +30,12 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Integer>
      * @return a list of VehicleEntity objects owned by the specified user
      */
     List<VehicleEntity> findByOwner(UserEntity owner);
+
+    @Query("""
+    SELECT DATE(v.listingDate) AS date, COUNT(v) AS listingCount
+    FROM VehicleEntity v
+    GROUP BY DATE(v.listingDate)
+    ORDER BY DATE(v.listingDate)
+    """)
+    List<ListingCountProjection> getListingCountByDate();
 }

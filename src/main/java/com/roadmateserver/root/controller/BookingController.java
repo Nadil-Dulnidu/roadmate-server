@@ -45,10 +45,10 @@ public class BookingController {
         return ResponseEntity.ok(bookingDTOS);
     }
 
-    @DeleteMapping(produces = Constants.APPLICATION_JSON, consumes = Constants.APPLICATION_JSON)
+    @DeleteMapping(value = "/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<BookingDTO> deleteBooking(
-            @Valid @RequestBody final BookingDTO bookingDTO) {
-        final BookingDTO deletedBookingDTO = bookingService.deleteBooking(bookingDTO);
+            @PathVariable Integer id) {
+        final BookingDTO deletedBookingDTO = bookingService.deleteBooking(id);
         return ResponseEntity.ok(deletedBookingDTO);
     }
 

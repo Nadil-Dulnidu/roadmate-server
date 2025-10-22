@@ -29,7 +29,7 @@ public interface BookingService {
      * @return the booking data transfer object that was deleted.
      * @throws IllegalArgumentException if the provided bookingId is {@code null} or invalid.
      */
-    BookingDTO deleteBooking(BookingDTO bookingDTO);
+    BookingDTO deleteBooking(Integer bookingId);
 
     /**
      * Retrieves a booking by its unique identifier.

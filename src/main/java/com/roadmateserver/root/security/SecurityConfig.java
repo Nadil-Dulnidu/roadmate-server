@@ -48,8 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**","/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/listing/vehicle/**").permitAll()
                         .requestMatchers("/clerk/**").permitAll()
-                        .requestMatchers("/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/audit/**").permitAll()
+                        .requestMatchers("/**").permitAll()                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(clerkPublicKey()), UsernamePasswordAuthenticationFilter.class)
                 .build();

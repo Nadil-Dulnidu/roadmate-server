@@ -13,6 +13,7 @@ import com.roadmateserver.root.mapper.BookingDTOEntityMapper;
 import com.roadmateserver.root.mapper.VehicleDTOEntityMapper;
 import com.roadmateserver.root.repository.BookingRepository;
 import com.roadmateserver.root.repository.UserRepository;
+import com.roadmateserver.root.repository.VehicleRepository;
 import com.roadmateserver.root.service.BookingService;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +30,13 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final VehicleService vehicleService;
+    private final VehicleRepository vehicleRepository;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
                               UserRepository userRepository,
-                              VehicleService vehicleService) {
+                              VehicleService vehicleService,
+                              VehicleRepository vehicleRepository) {
+        this.vehicleRepository = vehicleRepository;
         this.vehicleService = vehicleService;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
@@ -52,12 +56,22 @@ public class BookingServiceImpl implements BookingService {
             return new UserNotFoundException("User not found");
         });
         log.debug("User found: {}", userEntity);
-        final VehicleEntity vehicleEntity = VehicleDTOEntityMapper.map(bookingDTO.getVehicle());
+        final VehicleEntity vehicleEntity = vehicleRepository.findById(bookingDTO.getVehicle().getVehicleId())
+                .orElseThrow(() -> {
+            log.error("Vehicle with ID {} not found", bookingDTO.getVehicle().getVehicleId());
+            return new BookingException("Vehicle not found");
+        });
         log.debug("Vehicle mapped: {}", vehicleEntity);
+        if(!vehicleEntity.getIsAvailable().equals(Constants.VehicleStatus.AVAILABLE)){
+            log.error("Vehicle with ID {} is not available for booking", vehicleEntity.getVehicleId());
+            throw new BookingException("Vehicle is not available for booking");
+        }
         final BookingEntity bookingEntity = BookingDTOEntityMapper.map(bookingDTO);
         log.debug("Booking entity created: {}", bookingEntity);
         bookingEntity.setRenter(userEntity);
+        vehicleRepository.save(vehicleEntity);
         bookingEntity.setVehicle(vehicleEntity);
+        vehicleEntity.setIsAvailable(Constants.VehicleStatus.RESERVED);
         log.debug("Successfully set renter and vehicle in booking entity");
         final BookingEntity savedBookingEntity = bookingRepository.save(bookingEntity);
         log.info("Booking created successfully with ID: {}", savedBookingEntity.getBookingId());
@@ -85,24 +99,25 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BookingDTO deleteBooking(final BookingDTO bookingDTO) {
-        if(Objects.isNull(bookingDTO)){
-            log.error("Booking details are null");
-            throw new IllegalArgumentException("BookingDTO cannot be null");
+    public BookingDTO deleteBooking(final Integer bookingId) {
+        if(Objects.isNull(bookingId)){
+            log.error("Booking ID is null");
+            throw new IllegalArgumentException("Booking ID cannot be null");
         }
-        if(!bookingDTO.getStatus().equals(Constants.BookingStatus.PENDING)){
-            log.error("Booking with ID {} cannot be deleted as it is not in PENDING status", bookingDTO.getId());
-            throw new BookingException("Booking can only be deleted if it is in PENDING status");
-        }
-        log.info("Deleting booking with ID: {}", bookingDTO.getId());
-        final BookingEntity bookingEntity = bookingRepository.findById(bookingDTO.getId())
+        log.info("Deleting booking with ID: {}", bookingId);
+        final BookingEntity bookingEntity = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> {
-                    log.error("Booking with ID {} not found", bookingDTO.getId());
+                    log.error("Booking with ID {} not found", bookingId);
                     return new BookingNotFoundException("Booking not found");
                 });
         log.debug("Booking found: {}", bookingEntity);
+        if(!bookingEntity.getStatus().equals(Constants.BookingStatus.PENDING)){
+            log.error("Booking with ID {} cannot be deleted as it is not in PENDING status", bookingId);
+            throw new BookingException("Booking can only be deleted if it is in PENDING status");
+        }
+        log.debug("Booking found: {}", bookingEntity);
         bookingRepository.delete(bookingEntity);
-        log.info("Booking with ID {} deleted successfully", bookingDTO.getId());
+        log.info("Booking with ID {} deleted successfully", bookingId);
         return BookingDTOEntityMapper.map(bookingEntity);
 
     }
