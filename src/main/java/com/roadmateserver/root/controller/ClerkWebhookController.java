@@ -38,6 +38,12 @@ public class ClerkWebhookController {
                 throw new IllegalArgumentException("Invalid data: Missing userId");
             }
             final String userId = data.get("id").toString();
+
+            if(body.get("type").equals("user.deleted")){
+                userService.deleteUserByClerkId(userId);
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+
             final JsonNode emailNode = root.path("data")
                     .path("email_addresses")
                     .get(0).path("email_address");
