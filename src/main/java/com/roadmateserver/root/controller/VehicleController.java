@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,7 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
+    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @PostMapping(value = "/vehicle", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<VehicleDTO> registerVehicle(
             @RequestPart("files") final List<MultipartFile> files,
@@ -43,6 +45,7 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleDTO);
     }
 
+    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @PutMapping("/vehicle")
     public ResponseEntity<VehicleDTO> updateVehicle(
             @Valid
@@ -51,6 +54,7 @@ public class VehicleController {
         return ResponseEntity.ok(updatedVehicleDTO);
     }
 
+    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @DeleteMapping("/vehicle/{vehicleId}")
     public ResponseEntity<VehicleDTO> deleteVehicle(
             @Min(value = 1, message = "vehicle id must be a positive number")
@@ -69,6 +73,7 @@ public class VehicleController {
         return ResponseEntity.ok(vehicles);
     }
 
+    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @PatchMapping("/vehicle/{vehicleId}")
     public ResponseEntity<VehicleDTO> updateVehicleStatus(
             @Min(value = 1, message = "vehicle id must be a positive number")
@@ -78,6 +83,7 @@ public class VehicleController {
         return ResponseEntity.ok(updatedVehicleDTO);
     }
 
+    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @GetMapping("/vehicle/owner/{ownerId}")
     public ResponseEntity<List<VehicleDTO>> getAllVehiclesByOwnerId(
             @PathVariable final String ownerId) {
@@ -85,6 +91,7 @@ public class VehicleController {
         return ResponseEntity.ok(vehicles);
     }
 
+    @PreAuthorize(Constants.ADMIN_OR_STAFF_ROLE_PERMISSION)
     @PatchMapping("/vehicle/listing-status/{vehicleId}")
     public ResponseEntity<VehicleDTO> updateListingStatus(
             @Min(value = 1, message = "vehicle id must be a positive number")

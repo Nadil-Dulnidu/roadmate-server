@@ -6,6 +6,7 @@ import com.roadmateserver.root.service.BookingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
+    @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)
     @PostMapping(produces = Constants.APPLICATION_JSON, consumes = Constants.APPLICATION_JSON)
     public ResponseEntity<BookingDTO> createBooking(
             @Valid @RequestBody final BookingDTO bookingDTO) {
@@ -29,6 +31,7 @@ public class BookingController {
         return ResponseEntity.ok(savedBookingDTO);
     }
 
+    @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)
     @GetMapping(value = "/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<BookingDTO> getBookingById(
             @Min(value = 1, message = "id must be a positive integer")
@@ -37,6 +40,7 @@ public class BookingController {
         return ResponseEntity.ok(booking);
     }
 
+    @PreAuthorize(Constants.ADMIN_OR_STAFF_ROLE_PERMISSION)
     @GetMapping(produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<BookingDTO>> getAllBookings(
             @RequestParam(required = false, value = "status")

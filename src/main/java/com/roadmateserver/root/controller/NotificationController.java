@@ -7,6 +7,7 @@ import com.roadmateserver.root.service.NotificationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,6 +54,7 @@ public class NotificationController {
         return ResponseEntity.ok(updatedNotification);
     }
 
+    @PreAuthorize(Constants.ADMIN_OR_STAFF_ROLE_PERMISSION)
     @PostMapping(value = "/announcement", consumes = Constants.APPLICATION_JSON)
     public ResponseEntity<Void> createAnnouncementNotification(
             @Valid @RequestBody final AnnouncementRequestDTO announcementRequestDTO) {

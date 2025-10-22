@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @PreAuthorize(Constants.ADMIN_OR_STAFF_ROLE_PERMISSION)
     @GetMapping(produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<UserDTO>> getAllUsers(
             @RequestParam(value = "role", required = false) List<Constants.UserRole> userRoles) {

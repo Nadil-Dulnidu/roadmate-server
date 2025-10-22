@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
+    @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)
     @PostMapping(consumes = Constants.APPLICATION_JSON, produces = Constants.APPLICATION_JSON)
     public ResponseEntity<ReviewDTO> createReview(
             @Valid
@@ -32,6 +34,7 @@ public class ReviewController {
         return ResponseEntity.ok(createdReview);
     }
 
+    @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
     @GetMapping(value = "/vehicle/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<ReviewDTO>> getReviewsForVehicle(
             @Min(value = 1, message = "id must be a positive integer")
@@ -40,6 +43,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
+    @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)
     @GetMapping(value = "/user/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<ReviewDTO>> getReviewsByUserId(
             @PathVariable("id") final String userId) {
@@ -53,7 +57,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-
+    @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)
     @DeleteMapping(value = "/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<ReviewDTO> deleteReview(
             @Min(value = 1 , message = "id must be positive integer")
@@ -62,6 +66,7 @@ public class ReviewController {
         return ResponseEntity.ok(deletedReview);
     }
 
+    @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)
     @PutMapping(consumes = Constants.APPLICATION_JSON, produces = Constants.APPLICATION_JSON)
     public ResponseEntity<ReviewDTO> updateReview(
             @Valid
