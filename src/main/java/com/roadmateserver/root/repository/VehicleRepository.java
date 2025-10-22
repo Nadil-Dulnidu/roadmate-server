@@ -34,6 +34,7 @@ public interface VehicleRepository extends JpaRepository<VehicleEntity, Integer>
     @Query("""
     SELECT DATE(v.listingDate) AS date, COUNT(v) AS listingCount
     FROM VehicleEntity v
+    WHERE v.listingStatus = "APPROVED"
     GROUP BY DATE(v.listingDate)
     ORDER BY DATE(v.listingDate)
     """)
