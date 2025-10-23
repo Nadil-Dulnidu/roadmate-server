@@ -18,6 +18,9 @@ import com.roadmateserver.root.repository.VehicleRepository;
 import com.roadmateserver.root.service.S3Service;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +54,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"vehicleCache", "allVehiclesCache"}, allEntries = true)
     public VehicleDTO createNewVehicle(final VehicleDTO vehicleDTO, final List<MultipartFile> files) {
         log.info("Creating new vehicle...");
         if (Objects.isNull(vehicleDTO)) {
@@ -106,6 +110,8 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "allVehiclesCache", allEntries = true)
+    @CachePut(value = "vehicleCache", key = "#vehicleDTO.vehicleId")
     public VehicleDTO updateVehicle(final VehicleDTO vehicleDTO) {
         if (vehicleDTO == null) {
             log.error("VehicleDTO must not be null");
@@ -148,6 +154,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "vehicleCache", key = "#vehicleId")
     public VehicleDTO getVehicleById(final Integer vehicleId) {
         if (Objects.isNull(vehicleId)) {
             log.error("Failed to fetch vehicle: id is null");
@@ -172,6 +179,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"vehicleCache", "allVehiclesCache"}, key = "#vehicleId")
     public VehicleDTO deleteVehicle(final Integer vehicleId) {
         if (Objects.isNull(vehicleId)) {
             log.error("Failed to delete vehicle: id is null");
@@ -190,6 +198,8 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "allVehiclesCache", allEntries = true)
+    @CachePut(value = "vehicleCache", key = "#vehicleId")
     public VehicleDTO updateVehicleStatus(final Integer vehicleId, final Constants.VehicleStatus status) {
         if (Objects.isNull(vehicleId) || Objects.isNull(status)) {
             log.error("Vehicle ID and status must not be null");
@@ -212,6 +222,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "allVehiclesCache", key = "'allVehicles_'+#statuses+'_'+#vehicleStatuses")
     public List<VehicleDTO> getAllVehicles(List<Constants.ListingStatus> statuses, List<Constants.VehicleStatus> vehicleStatuses) {
         log.info("Fetching all vehicles with filters...");
         final List<VehicleEntity> vehicleEntities = vehicleRepository.findAll();
@@ -232,6 +243,8 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "allVehiclesCache", allEntries = true)
+    @CachePut(value = "vehicleCache", key = "#vehicleId")
     public VehicleDTO updateListingStatus(Integer vehicleId, Constants.ListingStatus listingStatus) {
         if (Objects.isNull(vehicleId) || Objects.isNull(listingStatus)) {
             log.error("Vehicle ID and listing status must not be null");
@@ -258,6 +271,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "allVehiclesByOwnerCache", key = "'owner_'+#ownerId")
     public List<VehicleDTO> getAllVehiclesByOwnerId(final String ownerId) {
         if (Objects.isNull(ownerId)) {
             log.error("Owner ID must not be null");
