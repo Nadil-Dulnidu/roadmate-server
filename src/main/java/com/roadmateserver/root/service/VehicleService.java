@@ -2,6 +2,7 @@ package com.roadmateserver.root.service;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.VehicleDTO;
+import com.roadmateserver.root.dto.cache.VehicleListCache;
 import org.springframework.stereotype.Service;
 import com.roadmateserver.root.exception.VehicleException;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,9 +57,10 @@ public interface VehicleService {
      * Retrieves all vehicles owned by a specific owner.
      *
      * @param ownerId the unique identifier of the owner whose vehicles are to be retrieved.
-     * @return a list of VehicleDTOs representing the vehicles owned by the specified owner. Never null, but may be empty.
+     * @return a VehicleListCache containing the vehicles owned by the specified owner. Never null, but may be empty.
+     * @throws IllegalArgumentException if the ownerId is null or invalid.
      */
-    List<VehicleDTO> getAllVehiclesByOwnerId(String ownerId);
+    VehicleListCache getAllVehiclesByOwnerId(String ownerId);
 
     /**
      * Updates the status of a vehicle.
@@ -76,9 +78,9 @@ public interface VehicleService {
      *
      * @param statuses a list of listing statuses to filter the vehicles by; can be null or empty to include all statuses.
      * @param vehicleStatuses a list of vehicle statuses to filter the vehicles by; can be null or empty to include all statuses.
-     * @return a list of VehicleDTOs representing the vehicles that match the specified filters. Never null, but may be empty.
+     * @return a VehicleListCache containing the vehicles that match the specified criteria. Never null, but may be empty.
      */
-    List<VehicleDTO> getAllVehicles(List<Constants.ListingStatus> statuses, List<Constants.VehicleStatus> vehicleStatuses);
+    VehicleListCache getAllVehicles(List<Constants.ListingStatus> statuses, List<Constants.VehicleStatus> vehicleStatuses);
 
 
     /**

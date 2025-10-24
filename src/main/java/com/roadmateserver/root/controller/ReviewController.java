@@ -2,6 +2,7 @@ package com.roadmateserver.root.controller;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.ReviewDTO;
+import com.roadmateserver.root.dto.cache.ReviewListCache;
 import com.roadmateserver.root.service.ReviewService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -38,22 +39,22 @@ public class ReviewController {
     public ResponseEntity<List<ReviewDTO>> getReviewsForVehicle(
             @Min(value = 1, message = "id must be a positive integer")
             @PathVariable("id") final Integer vehicleId) {
-        final List<ReviewDTO> reviews = reviewService.getReviewsByVehicleId(vehicleId);
-        return ResponseEntity.ok(reviews);
+        final ReviewListCache reviews = reviewService.getReviewsByVehicleId(vehicleId);
+        return ResponseEntity.ok(reviews.getReviewList());
     }
 
     @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)
     @GetMapping(value = "/user/{id}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<ReviewDTO>> getReviewsByUserId(
             @PathVariable("id") final String userId) {
-        final List<ReviewDTO> reviews = reviewService.getReviewsByUserId(userId);
-        return ResponseEntity.ok(reviews);
+        final ReviewListCache reviews = reviewService.getReviewsByUserId(userId);
+        return ResponseEntity.ok(reviews.getReviewList());
     }
 
     @GetMapping(produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<ReviewDTO>> getAllReviews() {
-        final List<ReviewDTO> reviews = reviewService.getReviews();
-        return ResponseEntity.ok(reviews);
+        final ReviewListCache reviews = reviewService.getReviews();
+        return ResponseEntity.ok(reviews.getReviewList());
     }
 
     @PreAuthorize(Constants.RENTER_ROLE_PERMISSION)

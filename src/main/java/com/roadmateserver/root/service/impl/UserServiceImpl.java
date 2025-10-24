@@ -12,6 +12,9 @@ import com.roadmateserver.root.service.UserService;
 import com.roadmateserver.root.utils.InterServiceCommunicationHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"userListCache","userCache"}, allEntries = true)
     public UserDTO createUser(final UserDTO userDTO) {
         log.info("creating new user with clerkId: {}", userDTO.getClerkId());
         if(Objects.isNull(userDTO.getClerkId()) ||
@@ -67,6 +71,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "userListCache", key = "'all_users_' + #userRoles")
     public List<UserDTO> getAllUsers(
             final List<Constants.UserRole> userRoles) {
         log.info("Fetching all users with filters - Roles: {}",
@@ -87,6 +92,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "userCache", key = "'user_' + #userId")
     public UserDTO getUserById(final Integer userId) {
         if(Objects.isNull(userId)){
             log.error("Failed to fetch user: id is null");
@@ -104,6 +110,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "userCache", key = "'user_' + #clerkId")
     public UserDTO getUserByClerkId(final String clerkId) {
         if(Objects.isNull(clerkId)){
             log.error("Failed to fetch user: id is null");
@@ -121,6 +128,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"userListCache","userCache"}, allEntries = true)
+    @CachePut(value = "userCache", key = "'user_' + #userDTO.clerkId")
     public UserDTO updateUser(final UserDTO userDTO) {
         log.info("Updating user with clerkId: {}", userDTO.getClerkId());
         if(Objects.isNull(userDTO.getClerkId()) || (Objects.isNull(userDTO.getFirstName())
@@ -141,6 +150,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value = {"userListCache","userCache"}, allEntries = true, key = "'user_' + #clerkId")
+    @Transactional(rollbackFor = Exception.class)
     public UserDTO deleteUserByClerkId(final String clerkId) {
         if(Objects.isNull(clerkId)){
             log.error("Failed to delete user: clerkId is null");
@@ -177,6 +188,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"userListCache","userCache"}, allEntries = true)
+    @CachePut(value = "userCache", key = "'user_' + #clerkId")
     public UserDTO updateUserRole(String clerkId, Constants.UserRole newRole) {
         log.info("Updating user with id: {}", clerkId);
         if (Objects.isNull(clerkId) || Objects.isNull(newRole)) {

@@ -2,6 +2,7 @@ package com.roadmateserver.root.service;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.BookingDTO;
+import com.roadmateserver.root.dto.cache.BookingListCache;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface BookingService {
      * Retrieves all bookings in the system, optionally filtered by user ID and vehicle ID.
      * @return a list of all booking data transfer objects matching the filters. Never {@code null}, but may be empty.
      */
-    List<BookingDTO> getAllBookings(List<Constants.BookingStatus> statuses);
+    BookingListCache getAllBookings(List<Constants.BookingStatus> statuses);
 
     /**
      * Deletes a booking by its unique identifier.
@@ -55,7 +56,7 @@ public interface BookingService {
      * @return a list of booking data transfer objects matching the criteria.
      * @throws IllegalArgumentException if the provided renterId is {@code null}.
      */
-    List<BookingDTO> getBookingsByRenterId(String renterId, List<Constants.BookingStatus> statuses);
+    BookingListCache getBookingsByRenterId(String renterId, List<Constants.BookingStatus> statuses);
 
     /**
      * Retrieves bookings for vehicles owned by a specific owner, optionally filtered by booking status.
@@ -64,5 +65,5 @@ public interface BookingService {
      * @return a list of booking data transfer objects matching the criteria.
      * @throws IllegalArgumentException if the provided ownerId is {@code null}.
      */
-    List<BookingDTO> getBookingsByOwnerId(String ownerId, List<Constants.BookingStatus> statuses);
+    BookingListCache getBookingsByOwnerId(String ownerId, List<Constants.BookingStatus> statuses);
 }

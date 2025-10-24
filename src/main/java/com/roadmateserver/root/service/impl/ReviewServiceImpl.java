@@ -1,6 +1,7 @@
 package com.roadmateserver.root.service.impl;
 
 import com.roadmateserver.root.dto.ReviewDTO;
+import com.roadmateserver.root.dto.cache.ReviewListCache;
 import com.roadmateserver.root.entity.ReviewEntity;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.entity.VehicleEntity;
@@ -14,6 +15,9 @@ import com.roadmateserver.root.repository.VehicleRepository;
 import com.roadmateserver.root.service.ReviewService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +41,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"reviewListCache", "reviewCache"}, allEntries = true)
     public ReviewDTO createNewReview(final ReviewDTO reviewDTO) {
         if(Objects.isNull(reviewDTO)){
             log.error("ReviewDTO cannot be null");
@@ -69,6 +74,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"reviewListCache"}, allEntries = true)
+    @CachePut(value = "reviewCache", key = "'review_' + #reviewDTO.reviewId")
     public ReviewDTO updateReview(final ReviewDTO reviewDTO) {
         if(Objects.isNull(reviewDTO)){
             log.error("ReviewDTO cannot be null");
@@ -91,6 +98,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Cacheable(value = "reviewCache", key = "'review_' + #reviewId")
     public ReviewDTO getReviewById(final Integer reviewId) {
         if(Objects.isNull(reviewId)){
             log.error("Review ID cannot be null");
@@ -108,6 +116,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"reviewListCache", "reviewCache"}, key = "'review_'+ #reviewId" , allEntries = true)
     public ReviewDTO deleteReview(final Integer reviewId) {
         if(Objects.isNull(reviewId)){
             log.error("Review ID cannot be null");
@@ -126,18 +135,20 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<ReviewDTO> getReviews() {
+    @Cacheable(value = "reviewListCache", key = "'all_reviews'")
+    public ReviewListCache getReviews() {
         log.info("Retrieving reviews");
         final List<ReviewDTO> reviewDTOS = reviewRepository.findAll()
                 .stream()
                 .map(ReviewDTOEntityMapper::map)
                 .toList();
         log.debug("Reviews retrieved: {}", reviewDTOS);
-        return reviewDTOS;
+        return new ReviewListCache(reviewDTOS);
     }
 
     @Override
-    public List<ReviewDTO> getReviewsByVehicleId(final Integer vehicleId) {
+    @Cacheable(value = "reviewListCache", key = "'vehicle_reviews_' + #vehicleId")
+    public ReviewListCache getReviewsByVehicleId(final Integer vehicleId) {
         if(Objects.isNull(vehicleId)){
             log.error("Vehicle ID cannot be null");
             throw new IllegalArgumentException("Vehicle ID cannot be null");
@@ -148,11 +159,12 @@ public class ReviewServiceImpl implements ReviewService {
                 .map(ReviewDTOEntityMapper::map)
                 .toList();
         log.debug("Reviews for vehicle ID {} retrieved: {}", vehicleId, reviewDTOS);
-        return reviewDTOS;
+        return new ReviewListCache(reviewDTOS);
     }
 
     @Override
-    public List<ReviewDTO> getReviewsByUserId(final String userId) {
+    @Cacheable(value = "reviewListCache", key = "'user_reviews_' + #userId")
+    public ReviewListCache getReviewsByUserId(final String userId) {
         if(Objects.isNull(userId)){
             log.error("User ID cannot be null");
             throw new IllegalArgumentException("User ID cannot be null");
@@ -163,7 +175,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .map(ReviewDTOEntityMapper::map)
                 .toList();
         log.debug("Reviews for user ID {} retrieved: {}", userId, reviewDTOS);
-        return reviewDTOS;
+        return new ReviewListCache(reviewDTOS);
     }
 
     //helper method to set review count and rating

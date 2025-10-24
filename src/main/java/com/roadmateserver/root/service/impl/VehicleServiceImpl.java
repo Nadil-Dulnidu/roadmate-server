@@ -5,6 +5,7 @@ import com.roadmateserver.root.components.ServiceFeeStrategy;
 import com.roadmateserver.root.components.ServiceFeeStrategyFactory;
 import com.roadmateserver.root.dto.ImageDTO;
 import com.roadmateserver.root.dto.VehicleDTO;
+import com.roadmateserver.root.dto.cache.VehicleListCache;
 import com.roadmateserver.root.entity.ImageEntity;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.entity.VehicleEntity;
@@ -111,7 +112,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "allVehiclesCache", allEntries = true)
-    @CachePut(value = "vehicleCache", key = "#vehicleDTO.vehicleId")
+    @CachePut(value = "vehicleCache", key = "'vehicle_' + #vehicleDTO.getVehicleId()")
     public VehicleDTO updateVehicle(final VehicleDTO vehicleDTO) {
         if (vehicleDTO == null) {
             log.error("VehicleDTO must not be null");
@@ -153,8 +154,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    @Cacheable(value = "vehicleCache", key = "#vehicleId")
+    @Cacheable(value = "vehicleCache", key = "'vehicle_' + #vehicleId")
     public VehicleDTO getVehicleById(final Integer vehicleId) {
         if (Objects.isNull(vehicleId)) {
             log.error("Failed to fetch vehicle: id is null");
@@ -179,7 +179,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"vehicleCache", "allVehiclesCache"}, key = "#vehicleId")
+    @CacheEvict(value = {"vehicleCache", "allVehiclesCache"}, key = "'vehicle_' + #vehicleId", allEntries = true)
     public VehicleDTO deleteVehicle(final Integer vehicleId) {
         if (Objects.isNull(vehicleId)) {
             log.error("Failed to delete vehicle: id is null");
@@ -199,7 +199,7 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "allVehiclesCache", allEntries = true)
-    @CachePut(value = "vehicleCache", key = "#vehicleId")
+    @CachePut(value = "vehicleCache", key = "'vehicle_' + #vehicleId")
     public VehicleDTO updateVehicleStatus(final Integer vehicleId, final Constants.VehicleStatus status) {
         if (Objects.isNull(vehicleId) || Objects.isNull(status)) {
             log.error("Vehicle ID and status must not be null");
@@ -221,14 +221,15 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     @Cacheable(value = "allVehiclesCache", key = "'allVehicles_'+#statuses+'_'+#vehicleStatuses")
-    public List<VehicleDTO> getAllVehicles(List<Constants.ListingStatus> statuses, List<Constants.VehicleStatus> vehicleStatuses) {
+    public VehicleListCache getAllVehicles(List<Constants.ListingStatus> statuses, List<Constants.VehicleStatus> vehicleStatuses) {
         log.info("Fetching all vehicles with filters...");
         final List<VehicleEntity> vehicleEntities = vehicleRepository.findAll();
         final List<VehicleDTO> vehicleDTOs = vehicleEntities.stream()
-                .filter(vehicleEntity -> (statuses == null || statuses.isEmpty() || statuses.contains(vehicleEntity.getListingStatus())))
-                .filter(vehicleEntity -> (vehicleStatuses == null || vehicleStatuses.isEmpty() || vehicleStatuses.contains(vehicleEntity.getIsAvailable())))
+                .filter(vehicleEntity ->
+                        (statuses == null || statuses.isEmpty() || statuses.contains(vehicleEntity.getListingStatus())))
+                .filter(vehicleEntity ->
+                        (vehicleStatuses == null || vehicleStatuses.isEmpty() || vehicleStatuses.contains(vehicleEntity.getIsAvailable())))
                 .map(vehicleEntity -> {
                     final VehicleDTO vehicleDTO = VehicleDTOEntityMapper.map(vehicleEntity);
                     final List<ImageDTO> imageDTOs = vehicleEntity.getImages().stream()
@@ -238,13 +239,13 @@ public class VehicleServiceImpl implements VehicleService {
                     return vehicleDTO;
                 }).toList();
         log.info("Fetched {} vehicles successfully.", vehicleDTOs.size());
-        return vehicleDTOs;
+        return new VehicleListCache(vehicleDTOs);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "allVehiclesCache", allEntries = true)
-    @CachePut(value = "vehicleCache", key = "#vehicleId")
+    @CachePut(value = "vehicleCache", key = "'vehicle_' + #vehicleId")
     public VehicleDTO updateListingStatus(Integer vehicleId, Constants.ListingStatus listingStatus) {
         if (Objects.isNull(vehicleId) || Objects.isNull(listingStatus)) {
             log.error("Vehicle ID and listing status must not be null");
@@ -270,9 +271,8 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    @Cacheable(value = "allVehiclesByOwnerCache", key = "'owner_'+#ownerId")
-    public List<VehicleDTO> getAllVehiclesByOwnerId(final String ownerId) {
+    @Cacheable(value = "allVehiclesCache", key = "'owner_'+#ownerId")
+    public VehicleListCache getAllVehiclesByOwnerId(final String ownerId) {
         if (Objects.isNull(ownerId)) {
             log.error("Owner ID must not be null");
             throw new IllegalArgumentException("Owner ID must not be null");
@@ -296,7 +296,7 @@ public class VehicleServiceImpl implements VehicleService {
                 })
                 .toList();
         log.info("Fetched {} vehicles successfully.", vehicleDTOs.size());
-        return vehicleDTOs;
+        return new VehicleListCache(vehicleDTOs);
     }
 
     //helper method for calculate total rental price

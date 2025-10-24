@@ -3,6 +3,7 @@ package com.roadmateserver.root.service.impl;
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.BookingDTO;
 import com.roadmateserver.root.dto.VehicleDTO;
+import com.roadmateserver.root.dto.cache.BookingListCache;
 import com.roadmateserver.root.entity.BookingEntity;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.entity.VehicleEntity;
@@ -17,6 +18,9 @@ import com.roadmateserver.root.repository.VehicleRepository;
 import com.roadmateserver.root.service.BookingService;
 import com.roadmateserver.root.service.VehicleService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +52,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"bookingListCache", "bookingCache"}, allEntries = true)
     public BookingDTO createBooking(final BookingDTO bookingDTO) {
         if(Objects.isNull(bookingDTO)){
             log.error("Booking details are null");
@@ -83,8 +88,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<BookingDTO> getAllBookings(List<Constants.BookingStatus> statuses) {
+    @Cacheable(value = "bookingListCache", key = "'all_bookings_statuses_' + #statuses")
+    public BookingListCache getAllBookings(List<Constants.BookingStatus> statuses) {
         log.info("Getting all bookings");
         final List<BookingDTO> bookingDTOS = bookingRepository.findAll()
                 .stream()
@@ -98,11 +103,12 @@ public class BookingServiceImpl implements BookingService {
                     return bookingDTO;
                 }).toList();
         log.info("Retrieved {} bookings", bookingDTOS.size());
-        return bookingDTOS;
+        return new BookingListCache(bookingDTOS);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"bookingListCache", "bookingCache"},key = "'booking_' + #bookingId", allEntries = true)
     public BookingDTO deleteBooking(final Integer bookingId) {
         if(Objects.isNull(bookingId)){
             log.error("Booking ID is null");
@@ -127,7 +133,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Cacheable(value = "bookingCache", key = "'booking_' + #bookingId")
     public BookingDTO getBookingById(final Integer bookingId) {
         if(Objects.isNull(bookingId)){
             log.error("Booking ID is null");
@@ -150,6 +156,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "bookingListCache", allEntries = true)
+    @CachePut(value = "bookingCache", key = "'booking_' + #bookingId")
     public BookingDTO updateBookingStatus(final Integer bookingId, final Constants.BookingStatus bookingStatus) {
         if(Objects.isNull(bookingId) || Objects.isNull(bookingStatus)){
             log.error("Booking ID or status is null");
@@ -169,7 +177,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDTO> getBookingsByRenterId(final String renterId, final List<Constants.BookingStatus> statuses) {
+    @Cacheable(value = "bookingListCache", key = "'renter_' + #renterId + '_statuses_' + #statuses")
+    public BookingListCache getBookingsByRenterId(final String renterId, final List<Constants.BookingStatus> statuses) {
         if (Objects.isNull(renterId) || renterId.isBlank()) {
             log.error("Renter ID is null or blank");
             throw new IllegalArgumentException("Renter ID must not be null or blank");
@@ -188,11 +197,12 @@ public class BookingServiceImpl implements BookingService {
                 .filter(bookingDTO -> statuses == null || statuses.isEmpty() || statuses.contains(bookingDTO.getStatus()))
                 .toList();
         log.info("Retrieved {} bookings", bookingDTOS.size());
-        return bookingDTOS;
+        return new BookingListCache(bookingDTOS);
     }
 
     @Override
-    public List<BookingDTO> getBookingsByOwnerId(final String ownerId, final List<Constants.BookingStatus> statuses) {
+    @Cacheable(value = "bookingListCache", key = "'owner_' + #ownerId + '_statuses_' + #statuses")
+    public BookingListCache getBookingsByOwnerId(final String ownerId, final List<Constants.BookingStatus> statuses) {
         if (Objects.isNull(ownerId) || ownerId.isBlank()) {
             log.error("Owner ID is null or blank");
             throw new IllegalArgumentException("Owner ID must not be null or blank");
@@ -211,47 +221,40 @@ public class BookingServiceImpl implements BookingService {
                 .filter(bookingDTO -> statuses == null || statuses.isEmpty() || statuses.contains(bookingDTO.getStatus()))
                 .toList();
         log.info("Retrieved {} bookings", bookingDTOS.size());
-        return bookingDTOS;
+        return new BookingListCache(bookingDTOS);
     }
 
-//    @Transactional
-//    @Scheduled(cron = "0 5 0 * * *")
-//    public void activateBookingsBasedOnPickupDate() {
-//        LocalDate today = LocalDate.now();
-//        log.info("Running booking activation scheduler for date: {}", today);
-//
-//        List<BookingEntity> bookings = bookingRepository.findAll();
-//        for (BookingEntity booking : bookings) {
-//            LocalDate startDate = LocalDate.parse(booking.getStartDate(), FORMATTER);
-//            if (startDate.equals(today) && booking.getStatus() == Constants.BookingStatus.CONFIRMED) {
-//                booking.setStatus(Constants.BookingStatus.ACTIVE);
-//                bookingRepository.save(booking);
-//                log.info("Activated booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
-//            }
-//        }
-//    }
-//
-//    @Transactional
-//    @Scheduled(cron = "0 55 23 * * *")
-//    public void completeBookingsBasedOnReturnDate() {
-//        LocalDate today = LocalDate.now();
-//        log.info("Running booking completion scheduler for date: {}", today);
-//
-//        List<BookingEntity> bookings = bookingRepository.findAll();
-//        for (BookingEntity booking : bookings) {
-//            LocalDate endDate = LocalDate.parse(booking.getEndDate(), FORMATTER);
-//            if (endDate.equals(today) && booking.getStatus() == Constants.BookingStatus.ACTIVE) {
-//                booking.setStatus(Constants.BookingStatus.COMPLETED);
-//                final VehicleEntity vehicleEntity = vehicleRepository.findById(booking.getVehicle().getVehicleId())
-//                        .orElseThrow(() -> {
-//                            log.error("Vehicle with ID {} not found", booking.getVehicle().getVehicleId());
-//                            return new BookingException("Vehicle not found");
-//                        });
-//                vehicleEntity.setIsAvailable(Constants.VehicleStatus.AVAILABLE);
-//                vehicleRepository.save(vehicleEntity);
-//                bookingRepository.save(booking);
-//                log.info("Completed booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
-//            }
-//        }
-//    }
+    @Transactional
+    @Scheduled(cron = "0 5 0 * * *")
+    public void activateBookingsBasedOnPickupDate() {
+        LocalDate today = LocalDate.now();
+        log.info("Running booking activation scheduler for date: {}", today);
+
+        List<BookingEntity> bookings = bookingRepository.findAll();
+        for (BookingEntity booking : bookings) {
+            LocalDate startDate = LocalDate.parse(booking.getStartDate(), FORMATTER);
+            if (startDate.equals(today) && booking.getStatus() == Constants.BookingStatus.CONFIRMED) {
+                booking.setStatus(Constants.BookingStatus.ACTIVE);
+                bookingRepository.save(booking);
+                log.info("Activated booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
+            }
+        }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 55 23 * * *")
+    public void completeBookingsBasedOnReturnDate() {
+        LocalDate today = LocalDate.now();
+        log.info("Running booking completion scheduler for date: {}", today);
+
+        List<BookingEntity> bookings = bookingRepository.findAll();
+        for (BookingEntity booking : bookings) {
+            LocalDate endDate = LocalDate.parse(booking.getEndDate(), FORMATTER);
+            if (endDate.equals(today) && booking.getStatus() == Constants.BookingStatus.ACTIVE) {
+                booking.setStatus(Constants.BookingStatus.COMPLETED);
+                bookingRepository.save(booking);
+                log.info("Completed booking ID {} (Vehicle ID: {})", booking.getBookingId(), booking.getVehicle().getVehicleId());
+            }
+        }
+    }
 }

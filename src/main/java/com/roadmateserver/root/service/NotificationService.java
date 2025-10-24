@@ -2,6 +2,7 @@ package com.roadmateserver.root.service;
 
 import com.roadmateserver.root.dto.AnnouncementRequestDTO;
 import com.roadmateserver.root.dto.NotificationDTO;
+import com.roadmateserver.root.dto.cache.NotificationListCache;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public interface NotificationService {
      * @param userId the ID of the user whose notifications are to be retrieved
      * @return a list of NotificationDTOs containing notifications for the specified user
      */
-    List<NotificationDTO> getNotificationsByUserId(String userId);
+    NotificationListCache getNotificationsByUserId(String userId);
 
     /**
      * Marks a notification as read.

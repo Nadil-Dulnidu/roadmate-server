@@ -2,6 +2,7 @@ package com.roadmateserver.root.controller;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.VehicleDTO;
+import com.roadmateserver.root.dto.cache.VehicleListCache;
 import com.roadmateserver.root.service.VehicleService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -67,8 +68,8 @@ public class VehicleController {
             List<Constants.ListingStatus> statuses,
             @RequestParam(value = "vehicleStatus", required = false) final
             List<Constants.VehicleStatus> vehicleStatuses) {
-        final List<VehicleDTO> vehicles = vehicleService.getAllVehicles(statuses, vehicleStatuses);
-        return ResponseEntity.ok(vehicles);
+        final VehicleListCache vehicles = vehicleService.getAllVehicles(statuses, vehicleStatuses);
+        return ResponseEntity.ok(vehicles.getVehicles());
     }
 
     @PreAuthorize(Constants.OWNER_ROLE_PERMISSION)
@@ -84,8 +85,8 @@ public class VehicleController {
     @GetMapping("/vehicle/owner/{ownerId}")
     public ResponseEntity<List<VehicleDTO>> getAllVehiclesByOwnerId(
             @PathVariable final String ownerId) {
-        final List<VehicleDTO> vehicles = vehicleService.getAllVehiclesByOwnerId(ownerId);
-        return ResponseEntity.ok(vehicles);
+        final VehicleListCache vehicles = vehicleService.getAllVehiclesByOwnerId(ownerId);
+        return ResponseEntity.ok(vehicles.getVehicles());
     }
 
     @PreAuthorize(Constants.ADMIN_OR_STAFF_ROLE_PERMISSION)

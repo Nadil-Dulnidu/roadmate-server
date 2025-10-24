@@ -3,6 +3,7 @@ package com.roadmateserver.root.service.impl;
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.AnnouncementRequestDTO;
 import com.roadmateserver.root.dto.NotificationDTO;
+import com.roadmateserver.root.dto.cache.NotificationListCache;
 import com.roadmateserver.root.entity.NotificationEntity;
 import com.roadmateserver.root.entity.UserEntity;
 import com.roadmateserver.root.exception.NotificationException;
@@ -12,7 +13,9 @@ import com.roadmateserver.root.repository.NotificationRepository;
 import com.roadmateserver.root.repository.UserRepository;
 import com.roadmateserver.root.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
-    @Autowired
     public NotificationServiceImpl(NotificationRepository notificationRepository, UserRepository userRepository) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
@@ -36,6 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"notificationListCache","notificationCache"}, allEntries = true)
     public NotificationDTO sendNotification(final NotificationDTO notificationDTO) {
         if (Objects.isNull(notificationDTO)) {
             log.error("Notification details cannot be null");
@@ -61,7 +64,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public List<NotificationDTO> getNotificationsByUserId(final String userId) {
+    @Cacheable(value = "notificationListCache", key = "'notifications_user_' + #userId")
+    public NotificationListCache getNotificationsByUserId(final String userId) {
         if (Objects.isNull(userId)) {
             log.error("User ID cannot be null");
             throw new NotificationException("User ID cannot be null");
@@ -71,11 +75,13 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(NotificationDTOEntityMapper::map)
                 .toList();
         log.info("Notifications retrieved successfully for user ID: {}", userId);
-        return notificationDTOS;
+        return new NotificationListCache(notificationDTOS);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "notificationListCache", allEntries = true)
+    @CachePut(value = "notificationCache", key = "'notification_' + #notificationId")
     public NotificationDTO markNotificationAsRead(final Integer notificationId) {
         if (Objects.isNull(notificationId)) {
             log.error("Notification ID cannot be null");
@@ -94,6 +100,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"notificationListCache","notificationCache"}, key = "'notification_' + #notificationId", allEntries = true)
     public NotificationDTO deleteNotification(final Integer notificationId) {
         if (Objects.isNull(notificationId)) {
             log.error("Notification ID cannot be null");
@@ -113,6 +120,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Async
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "notificationListCache", allEntries = true)
     public void createAnnouncementNotification(final AnnouncementRequestDTO announcementRequestDTO) {
         if (Objects.isNull(announcementRequestDTO) || announcementRequestDTO.getMessage().isBlank()) {
             log.error("Announcement details cannot be null or blank");

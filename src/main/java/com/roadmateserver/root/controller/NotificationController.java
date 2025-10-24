@@ -3,6 +3,7 @@ package com.roadmateserver.root.controller;
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.AnnouncementRequestDTO;
 import com.roadmateserver.root.dto.NotificationDTO;
+import com.roadmateserver.root.dto.cache.NotificationListCache;
 import com.roadmateserver.root.service.NotificationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -26,8 +27,8 @@ public class NotificationController {
     @GetMapping(value = "/user/{userId}", produces = Constants.APPLICATION_JSON)
     public ResponseEntity<List<NotificationDTO>> getNotificationsByUserId(
             @PathVariable final String userId) {
-        final List<NotificationDTO> notifications = notificationService.getNotificationsByUserId(userId);
-        return ResponseEntity.ok(notifications);
+        final NotificationListCache notifications = notificationService.getNotificationsByUserId(userId);
+        return ResponseEntity.ok(notifications.getNotificationList());
     }
 
     @PostMapping(consumes = Constants.APPLICATION_JSON, produces = Constants.APPLICATION_JSON)

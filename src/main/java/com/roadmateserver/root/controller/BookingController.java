@@ -2,6 +2,7 @@ package com.roadmateserver.root.controller;
 
 import com.roadmateserver.root.common.Constants;
 import com.roadmateserver.root.dto.BookingDTO;
+import com.roadmateserver.root.dto.cache.BookingListCache;
 import com.roadmateserver.root.service.BookingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -45,8 +46,8 @@ public class BookingController {
     public ResponseEntity<List<BookingDTO>> getAllBookings(
             @RequestParam(required = false, value = "status")
             List<Constants.BookingStatus> statuses) {
-        final List<BookingDTO> bookingDTOS = bookingService.getAllBookings(statuses);
-        return ResponseEntity.ok(bookingDTOS);
+        final BookingListCache bookingDTOS = bookingService.getAllBookings(statuses);
+        return ResponseEntity.ok(bookingDTOS.getBookingList());
     }
 
     @DeleteMapping(value = "/{id}", produces = Constants.APPLICATION_JSON)
@@ -69,15 +70,15 @@ public class BookingController {
     public ResponseEntity<List<BookingDTO>> getBookingsByRenterId(
             @PathVariable("renterId") final String renterId,
             @RequestParam(required = false, value = "status") List<Constants.BookingStatus> statuses) {
-        final List<BookingDTO> bookings = bookingService.getBookingsByRenterId(renterId, statuses);
-        return ResponseEntity.ok(bookings);
+        final BookingListCache bookings = bookingService.getBookingsByRenterId(renterId, statuses);
+        return ResponseEntity.ok(bookings.getBookingList());
     }
 
     @GetMapping(value = "/owner/{ownerId}", produces = Constants.APPLICATION_JSON )
     public ResponseEntity<List<BookingDTO>> getBookingsByOwnerId(
             @PathVariable("ownerId") final String ownerId,
             @RequestParam(required = false, value = "status") List<Constants.BookingStatus> statuses) {
-        final List<BookingDTO> bookings = bookingService.getBookingsByOwnerId(ownerId, statuses);
-        return ResponseEntity.ok(bookings);
+        final BookingListCache bookings = bookingService.getBookingsByOwnerId(ownerId, statuses);
+        return ResponseEntity.ok(bookings.getBookingList());
     }
 }
