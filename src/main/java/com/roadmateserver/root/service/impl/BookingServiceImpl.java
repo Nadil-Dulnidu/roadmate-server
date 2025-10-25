@@ -78,9 +78,9 @@ public class BookingServiceImpl implements BookingService {
         final BookingEntity bookingEntity = BookingDTOEntityMapper.map(bookingDTO);
         log.debug("Booking entity created: {}", bookingEntity);
         bookingEntity.setRenter(userEntity);
+        vehicleEntity.setIsAvailable(Constants.VehicleStatus.RESERVED);
         vehicleRepository.save(vehicleEntity);
         bookingEntity.setVehicle(vehicleEntity);
-        vehicleEntity.setIsAvailable(Constants.VehicleStatus.RESERVED);
         log.debug("Successfully set renter and vehicle in booking entity");
         final BookingEntity savedBookingEntity = bookingRepository.save(bookingEntity);
         log.info("Booking created successfully with ID: {}", savedBookingEntity.getBookingId());
