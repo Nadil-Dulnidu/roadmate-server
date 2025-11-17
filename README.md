@@ -259,6 +259,16 @@ MySQL is used as the main relational database for storing structured and consist
 
 The combination of MySQL and Spring Boot ensures reliable backend operations and long-term platform stability.
 
+#### Storage Service (AWS S3)
+
+The platform uses Amazon S3 (Simple Storage Service) to store and manage all vehicle images uploaded by admins. S3 provides highly scalable, secure, and durable object storage, making it ideal for handling media files in production-grade applications.
+
+* **Optimized for Large Files:** Perfect for image storage, S3 is built to efficiently handle large objects and high-volume media requests without affecting backend performance.
+* **Scalable Storage:** Automatically scales without requiring infrastructure management, making it ideal for growing platforms with increasing vehicle listings.
+* **Secure Access Control:** Using IAM roles, pre-signed URLs, and bucket policies, S3 ensures secure upload and retrieval of images. Only authorized services or users can store or access vehicle images.
+
+The integration of S3 ensures efficient image handling while reducing backend load and improving overall frontend performance when displaying vehicle images.
+
 ### Key Features of the Software
 
 #### Vehicle Listing & Search
